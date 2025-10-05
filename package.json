@@ -1,0 +1,26 @@
+{
+  "name": "snifferx",
+  "version": "1.0.0",
+  "description": "Network Traffic Analyzer - Capture and analyze network traffic, detect DDoS, IP spoofing, and suspicious activities",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "network",
+    "traffic-analyzer",
+    "cybersecurity",
+    "packet-capture",
+    "wireshark",
+    "ddos-detection",
+    "ip-spoofing",
+    "security"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/SnifferX.git"
+  }
+}
