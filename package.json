@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -15,12 +16,18 @@
     "wireshark",
     "ddos-detection",
     "ip-spoofing",
-    "security"
+    "security",
+    "network-security",
+    "penetration-testing"
   ],
-  "author": "Your Name",
+  "author": "Vyom Khurana",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/SnifferX.git"
-  }
+    "url": "https://github.com/Vyomkhurana/SnifferX.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Vyomkhurana/SnifferX/issues"
+  },
+  "homepage": "https://github.com/Vyomkhurana/SnifferX#readme"
 }
