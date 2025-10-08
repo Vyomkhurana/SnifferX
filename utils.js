@@ -13,6 +13,16 @@ const getTimestamp = () => {
 };
 
 /**
+ * Calculate time difference in milliseconds
+ * @param {Date} start - Start time
+ * @param {Date} end - End time
+ * @returns {number} Time difference in ms
+ */
+const getTimeDiff = (start, end) => {
+    return end.getTime() - start.getTime();
+};
+
+/**
  * Format bytes to human readable format
  * @param {number} bytes - Number of bytes
  * @returns {string} Formatted string (e.g., "1.5 MB")

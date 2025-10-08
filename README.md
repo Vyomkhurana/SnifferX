@@ -2,9 +2,13 @@
 
 A powerful network traffic analyzer for cybersecurity analysis and threat detection.
 
+![License](https://img.shields.io/badge/license-ISC-blue.svg)
+![Node.js](https://img.shields.io/badge/node.js-%3E%3D14.0.0-brightgreen.svg)
+![Status](https://img.shields.io/badge/status-in%20development-yellow.svg)
+
 ## 🚀 About
 
-SnifferX is a network traffic analysis tool designed to capture, analyze, and detect malicious network activities in real-time.
+SnifferX is a network traffic analysis tool designed to capture, analyze, and detect malicious network activities in real-time. Built with Node.js for efficient packet processing and real-time analysis.
 
 ## ✨ Features (Planned)
 
