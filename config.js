@@ -3,13 +3,16 @@
  * Settings and configuration for network traffic analysis
  */
 
+const path = require('path');
+
 const config = {
     // Application Information
     app: {
         name: 'SnifferX',
         version: '1.0.0',
         author: 'Vyom Khurana',
-        description: 'Network Traffic Analyzer'
+        description: 'Network Traffic Analyzer',
+        github: 'https://github.com/Vyomkhurana/SnifferX'
     },
 
     // Network Settings (to be implemented)
@@ -17,7 +20,9 @@ const config = {
         defaultInterface: 'eth0',
         captureTimeout: 60000, // milliseconds
         maxPackets: 10000,
-        promiscuousMode: true
+        promiscuousMode: true,
+        bufferSize: 10 * 1024 * 1024, // 10MB
+        snapshotLength: 65535 // Max packet size to capture
     },
 
     // Detection Thresholds
@@ -25,16 +30,27 @@ const config = {
         ddos: {
             enabled: true,
             packetsPerSecondThreshold: 1000,
-            connectionThreshold: 500
+            connectionThreshold: 500,
+            timeWindow: 60, // seconds
+            sourceIPThreshold: 100 // connections from same source
         },
         ipSpoofing: {
             enabled: true,
             checkTTL: true,
-            checkSequence: true
+            checkSequence: true,
+            ttlVarianceThreshold: 10
         },
         portScanning: {
             enabled: true,
-            portsPerMinuteThreshold: 100
+            portsPerMinuteThreshold: 100,
+            distinctPortsThreshold: 20,
+            timeWindow: 60 // seconds
+        },
+        suspiciousActivity: {
+            enabled: true,
+            monitorProtocols: ['TCP', 'UDP', 'ICMP'],
+            checkPayloadSize: true,
+            unusualPortsAlert: true
         }
     },
 
@@ -42,15 +58,37 @@ const config = {
     logging: {
         enabled: true,
         level: 'info', // 'debug', 'info', 'warn', 'error'
-        outputDir: './logs',
-        maxFileSize: '10MB'
+        outputDir: path.join(__dirname, 'logs'),
+        maxFileSize: '10MB',
+        maxFiles: 5,
+        timestampFormat: 'YYYY-MM-DD HH:mm:ss',
+        logToFile: true,
+        logToConsole: true
     },
 
     // Alert Settings
     alerts: {
         enabled: true,
         methods: ['console', 'file'], // future: 'email', 'webhook'
-        severity: ['high', 'critical']
+        severity: ['high', 'critical'],
+        colorCoded: true,
+        soundAlert: false
+    },
+
+    // Analysis Settings
+    analysis: {
+        realTimeMonitoring: true,
+        statisticsInterval: 5000, // milliseconds
+        saveRawPackets: false,
+        exportFormat: 'json', // 'json', 'csv', 'pcap'
+        exportDir: path.join(__dirname, 'exports')
+    },
+
+    // Security Settings
+    security: {
+        requireElevatedPrivileges: true,
+        maxConcurrentCaptures: 1,
+        autoStopOnError: true
     }
 };
 
