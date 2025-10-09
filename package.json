@@ -29,5 +29,10 @@
   "bugs": {
     "url": "https://github.com/Vyomkhurana/SnifferX/issues"
   },
-  "homepage": "https://github.com/Vyomkhurana/SnifferX#readme"
+  "homepage": "https://github.com/Vyomkhurana/SnifferX#readme",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^14.0.1",
+    "fs-extra": "^11.3.2"
+  }
 }
