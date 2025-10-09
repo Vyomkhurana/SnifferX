@@ -30,6 +30,12 @@ logs/
 *.pcapng
 captures/
 
+# Exports
+exports/
+*.json
+!package.json
+!package-lock.json
+
 # Build outputs
 dist/
 build/
