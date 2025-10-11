@@ -53,11 +53,12 @@ class CaptureManager {
             '-e', 'tcp.dstport',
             '-e', 'udp.srcport',
             '-e', 'udp.dstport',
-            '-e', 'tcp.flags',
+            '-e', 'tcp.flags.str',
             '-e', '_ws.col.Protocol',
             '-e', '_ws.col.Info',
             '-E', 'separator=|',
-            '-E', 'quote=d'
+            '-E', 'quote=d',
+            '-E', 'occurrence=f'  // Only first occurrence of each field
         ];
 
         // Add interface if specified
@@ -164,21 +165,69 @@ class CaptureManager {
             return null; // Invalid packet line
         }
 
+        // Helper function to clean quotes from tshark output
+        const clean = (str) => {
+            if (!str) return '';
+            return str.replace(/^"(.*)"$/, '$1').trim();
+        };
+
+        // Parse basic fields
+        const frameNumber = parseInt(clean(fields[0])) || 0;
+        const timestamp = new Date(parseFloat(clean(fields[1])) * 1000);
+        const frameLength = parseInt(clean(fields[2])) || 0;
+        const srcMAC = clean(fields[3]) || 'unknown';
+        const dstMAC = clean(fields[4]) || 'unknown';
+        const srcIP = clean(fields[5]) || 'unknown';
+        const dstIP = clean(fields[6]) || 'unknown';
+        const ipProto = parseInt(clean(fields[7])) || 0;
+        const ttl = parseInt(clean(fields[8])) || 0;
+        
+        // Parse ports (TCP or UDP)
+        const tcpSrcPort = parseInt(clean(fields[9])) || null;
+        const tcpDstPort = parseInt(clean(fields[10])) || null;
+        const udpSrcPort = parseInt(clean(fields[11])) || null;
+        const udpDstPort = parseInt(clean(fields[12])) || null;
+        
+        const srcPort = tcpSrcPort || udpSrcPort;
+        const dstPort = tcpDstPort || udpDstPort;
+        
+        const tcpFlags = clean(fields[13]) || null;
+        const protocolName = clean(fields[14]) || 'unknown';
+        const info = clean(fields[15]) || '';
+        
+        // Determine protocol from protocol name field
+        let protocol = protocolName.toUpperCase();
+        
+        // If protocol name is unclear, determine from IP protocol number
+        if (!protocol || protocol === 'UNKNOWN' || protocol.length === 0) {
+            if (ipProto === 6) protocol = 'TCP';
+            else if (ipProto === 17) protocol = 'UDP';
+            else if (ipProto === 1) protocol = 'ICMP';
+            else if (ipProto > 0) protocol = `IP(${ipProto})`;
+            else protocol = 'OTHER';
+        }
+        
+        // Skip non-IP packets if srcIP is empty (like ARP)
+        if (!srcIP || srcIP === 'unknown' || srcIP.length === 0) {
+            // For ARP and other non-IP protocols
+            protocol = protocolName.toUpperCase() || 'NON-IP';
+        }
+
         const packet = new Packet({
-            frameNumber: parseInt(fields[0]) || 0,
-            timestamp: new Date(parseFloat(fields[1]) * 1000),
-            frameLength: parseInt(fields[2]) || 0,
-            srcMAC: fields[3] || 'unknown',
-            dstMAC: fields[4] || 'unknown',
-            srcIP: fields[5] || 'unknown',
-            dstIP: fields[6] || 'unknown',
-            ttl: parseInt(fields[8]) || 0,
-            srcPort: parseInt(fields[9]) || parseInt(fields[11]) || null,
-            dstPort: parseInt(fields[10]) || parseInt(fields[12]) || null,
-            tcpFlags: fields[13] || null,
-            protocol: fields[14] || 'unknown',
-            info: fields[15] || '',
-            length: parseInt(fields[2]) || 0
+            frameNumber,
+            timestamp,
+            frameLength,
+            srcMAC,
+            dstMAC,
+            srcIP: srcIP || 'N/A',
+            dstIP: dstIP || 'N/A',
+            ttl,
+            srcPort,
+            dstPort,
+            tcpFlags,
+            protocol,
+            info,
+            length: frameLength
         });
 
         return packet;
