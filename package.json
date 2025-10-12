@@ -2,11 +2,15 @@
   "name": "snifferx",
   "version": "1.0.0",
   "description": "Network Traffic Analyzer - Capture and analyze network traffic, detect DDoS, IP spoofing, and suspicious activities",
-  "main": "index.js",
+  "main": "snifferx.js",
+  "bin": {
+    "snifferx": "./snifferx.js"
+  },
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node snifferx.js",
+    "monitor": "node snifferx.js monitor",
+    "interfaces": "node snifferx.js interfaces",
+    "config": "node snifferx.js config"
   },
   "keywords": [
     "network",
