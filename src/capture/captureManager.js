@@ -335,16 +335,30 @@ class CaptureManager {
      */
     static async listInterfaces() {
         return new Promise((resolve, reject) => {
-            const tsharkPath = 'C:\\Program Files\\Wireshark\\tshark.exe';
-            const process = spawn(tsharkPath, ['-D']);
+            // Auto-detect tshark path based on platform
+            let tsharkPath;
+            if (process.platform === 'win32') {
+                tsharkPath = 'C:\\Program Files\\Wireshark\\tshark.exe';
+            } else if (process.platform === 'darwin') {
+                tsharkPath = '/usr/local/bin/tshark';
+            } else {
+                tsharkPath = '/usr/bin/tshark';
+            }
+            
+            const tsharkProcess = spawn(tsharkPath, ['-D']);
             
             let output = '';
+            let errorOutput = '';
             
-            process.stdout.on('data', (data) => {
+            tsharkProcess.stdout.on('data', (data) => {
                 output += data.toString();
             });
             
-            process.on('close', (code) => {
+            tsharkProcess.stderr.on('data', (data) => {
+                errorOutput += data.toString();
+            });
+            
+            tsharkProcess.on('close', (code) => {
                 if (code === 0) {
                     const interfaces = output.trim().split('\n').map(line => {
                         const match = line.match(/^(\d+)\.\s+(.+?)(?:\s+\((.+)\))?$/);
@@ -360,8 +374,12 @@ class CaptureManager {
                     
                     resolve(interfaces);
                 } else {
-                    reject(new Error('Failed to list interfaces'));
+                    reject(new Error(`Failed to list interfaces: ${errorOutput || 'tshark not found'}`));
                 }
+            });
+            
+            tsharkProcess.on('error', (err) => {
+                reject(new Error(`Failed to spawn tshark: ${err.message}. Make sure tshark is installed at: ${tsharkPath}`));
             });
         });
     }
