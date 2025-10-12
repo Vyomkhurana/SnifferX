@@ -16,7 +16,19 @@ class CaptureManager {
         this.packetCount = 0;
         this.startTime = null;
         this.packets = [];
-        this.tsharkPath = 'C:\\Program Files\\Wireshark\\tshark.exe';
+        
+        // Auto-detect tshark path based on platform
+        if (process.platform === 'win32') {
+            // Windows
+            this.tsharkPath = 'C:\\Program Files\\Wireshark\\tshark.exe';
+        } else if (process.platform === 'darwin') {
+            // macOS
+            this.tsharkPath = '/usr/local/bin/tshark';
+        } else {
+            // Linux
+            this.tsharkPath = '/usr/bin/tshark';
+        }
+        
         this.callbacks = {
             onPacket: null,
             onError: null,
