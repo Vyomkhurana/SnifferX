@@ -38,7 +38,7 @@ const config = {
             enabled: true,
             checkTTL: true,
             checkSequence: true,
-            ttlVarianceThreshold: 10
+            ttlVarianceThreshold: 40  // Increased from 10 to 40 - only flag major anomalies
         },
         portScanning: {
             enabled: true,

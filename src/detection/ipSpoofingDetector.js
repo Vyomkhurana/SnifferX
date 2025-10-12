@@ -17,9 +17,11 @@ class IPSpoofingDetector {
         this.packetCountByIP = new Map();        // IP -> packet count
         this.alerts = [];                        // Alert history
         this.suspiciousIPs = new Set();          // IPs flagged as spoofed
+        this.lastAlertTime = new Map();          // IP -> last alert timestamp
         
         // Minimum packets needed to establish baseline
-        this.minPacketsForBaseline = 5;
+        this.minPacketsForBaseline = 20;         // Increased from 5 to 20 for better baseline
+        this.alertCooldown = 60000;              // 60 seconds between alerts for same IP
         
         utils.log('info', '🎭 IP Spoofing Detector initialized');
     }
@@ -40,8 +42,13 @@ class IPSpoofingDetector {
             return null;
         }
 
-        // Skip multicast and broadcast addresses
-        if (this.isSpecialAddress(srcIP)) {
+        // Skip multicast, broadcast, and local addresses
+        if (this.isSpecialAddress(srcIP) || this.isLocalAddress(srcIP)) {
+            return null;
+        }
+        
+        // Skip packets from private networks (they have unpredictable TTLs)
+        if (this.isPrivateNetwork(srcIP)) {
             return null;
         }
 
@@ -107,15 +114,25 @@ class IPSpoofingDetector {
     checkForSpoofing(srcIP, currentTTL, packet) {
         const baselineTTL = this.baselineTTL.get(srcIP);
         const ttlDifference = Math.abs(currentTTL - baselineTTL);
+        
+        // Check alert cooldown (don't spam alerts for same IP)
+        const lastAlert = this.lastAlertTime.get(srcIP);
+        if (lastAlert && (Date.now() - lastAlert < this.alertCooldown)) {
+            return null; // Still in cooldown period
+        }
 
-        // Check TTL variance
-        if (this.config.checkTTL && ttlDifference > this.config.ttlVarianceThreshold) {
+        // Check TTL variance - MUCH stricter threshold now
+        // Only alert if difference is VERY large (indicates actual spoofing)
+        if (this.config.checkTTL && ttlDifference > 40) {  // Changed from 10 to 40
             const ttlValues = this.ttlByIP.get(srcIP);
             const variance = this.calculateVariance(ttlValues);
+            
+            // Record alert time
+            this.lastAlertTime.set(srcIP, Date.now());
 
             return {
                 type: 'ip_spoofing',
-                severity: ttlDifference > 30 ? 'critical' : 'high',
+                severity: ttlDifference > 60 ? 'critical' : 'high',  // Changed from 30 to 60
                 timestamp: new Date(),
                 srcIP: srcIP,
                 dstIP: packet.dstIP,
@@ -124,11 +141,11 @@ class IPSpoofingDetector {
                     currentTTL: currentTTL,
                     baselineTTL: Math.round(baselineTTL),
                     difference: ttlDifference,
-                    threshold: this.config.ttlVarianceThreshold,
+                    threshold: 40,  // Using hardcoded stricter threshold
                     variance: Math.round(variance * 100) / 100,
                     totalPackets: this.packetCountByIP.get(srcIP)
                 },
-                message: `⚠️  ${ttlDifference > 30 ? 'CRITICAL' : 'HIGH'}: Possible IP spoofing from ${chalk.red(srcIP)} - TTL: ${currentTTL} (expected: ~${Math.round(baselineTTL)}, diff: ${ttlDifference})`
+                message: `⚠️  ${ttlDifference > 60 ? 'CRITICAL' : 'HIGH'}: Possible IP spoofing from ${chalk.red(srcIP)} - TTL: ${currentTTL} (expected: ~${Math.round(baselineTTL)}, diff: ${ttlDifference})`
             };
         }
 
@@ -149,27 +166,8 @@ class IPSpoofingDetector {
             };
         }
 
-        // Check for common spoofing patterns (TTL exactly 64, 128, 255 - OS defaults)
-        // If IP was using different TTL before, sudden switch to exact default is suspicious
-        const commonDefaults = [64, 128, 255];
-        if (commonDefaults.includes(currentTTL) && !commonDefaults.includes(Math.round(baselineTTL))) {
-            if (ttlDifference > 10) {
-                return {
-                    type: 'ip_spoofing',
-                    severity: 'medium',
-                    timestamp: new Date(),
-                    srcIP: srcIP,
-                    dstIP: packet.dstIP,
-                    reason: 'Suspicious TTL pattern change',
-                    details: {
-                        currentTTL: currentTTL,
-                        baselineTTL: Math.round(baselineTTL),
-                        pattern: 'Sudden switch to default OS TTL value'
-                    },
-                    message: `⚠️  MEDIUM: Suspicious TTL change from ${chalk.cyan(srcIP)} - TTL: ${currentTTL} (baseline: ~${Math.round(baselineTTL)})`
-                };
-            }
-        }
+        // REMOVED: Common OS defaults check - too many false positives
+        // Normal TTL variation due to routing is not spoofing
 
         return null;
     }
@@ -185,6 +183,39 @@ class IPSpoofingDetector {
         const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
         const squaredDiffs = values.map(val => Math.pow(val - mean, 2));
         return squaredDiffs.reduce((sum, val) => sum + val, 0) / values.length;
+    }
+
+    /**
+     * Check if IP is from a private network
+     * @param {string} ip - IP address
+     * @returns {boolean} True if private network
+     */
+    isPrivateNetwork(ip) {
+        const parts = ip.split('.').map(p => parseInt(p));
+        if (parts.length !== 4) return false;
+        
+        // 10.0.0.0/8
+        if (parts[0] === 10) return true;
+        
+        // 172.16.0.0/12
+        if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+        
+        // 192.168.0.0/16
+        if (parts[0] === 192 && parts[1] === 168) return true;
+        
+        return false;
+    }
+    
+    /**
+     * Check if IP is a local/loopback address
+     * @param {string} ip - IP address
+     * @returns {boolean} True if local address
+     */
+    isLocalAddress(ip) {
+        if (ip.startsWith('127.')) return true;  // Loopback
+        if (ip.startsWith('169.254.')) return true;  // Link-local
+        if (ip === '0.0.0.0' || ip === '255.255.255.255') return true;
+        return false;
     }
 
     /**
