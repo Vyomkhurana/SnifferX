@@ -29,8 +29,8 @@ const config = {
     detection: {
         ddos: {
             enabled: true,
-            packetsPerSecondThreshold: 1000,
-            connectionThreshold: 500,
+            packetsPerSecondThreshold: 500,  // Lowered from 1000 to 500 for easier testing
+            connectionThreshold: 300,         // Lowered from 500 to 300 for easier testing
             timeWindow: 60, // seconds
             sourceIPThreshold: 100 // connections from same source
         },
