@@ -1,4 +1,4 @@
-# SnifferX 🛡️# SnifferX 🔍
+# SnifferX 🛡️
 
 
 
