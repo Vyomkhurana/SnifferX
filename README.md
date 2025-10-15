@@ -254,7 +254,7 @@ snifferx --help- Packet capture module
 
 📊 System Status|----------------|--------|-----------|
 
-───────────────────────────────────────────────────────────| DDoS Attack | Planned | 1000 pps |
+────────────────────────────────
 
   Total Packets:  12,543| IP Spoofing | Planned | TTL variance check |
 
@@ -398,3 +398,17 @@ MIT License - See [LICENSE](LICENSE)
 ---
 
 **Made with ❤️ for cybersecurity**
+
+---
+
+## 🏁 Next Phase Roadmap
+
+SnifferX is evolving! The next phase will focus on:
+
+- **Advanced Analytics**: Machine learning-based anomaly detection, historical traffic analysis, and automated threat reporting (see `analytics/` folder).
+- **Community Collaboration**: Clear contributing guidelines, code of conduct, and security policy for open source growth.
+- **SIEM Integration**: Export alerts and traffic data to external dashboards and security platforms.
+- **Performance Optimization**: Faster packet processing and lower resource usage.
+- **Modular Architecture**: Easier extension for new detection algorithms and plugins.
+
+Want to contribute? See `CONTRIBUTING.md` and open a pull request!
