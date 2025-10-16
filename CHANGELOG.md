@@ -2,6 +2,34 @@
 
 All notable changes to SnifferX will be documented in this file.
 
+## [1.1.0] - 2025-10-16
+
+### Added
+- 👤 **User Behavior Analytics (UBA)** - Advanced behavioral anomaly detection
+  - Learns normal user/device patterns over time
+  - Detects data exfiltration attempts (>10MB in 5 minutes)
+  - Identifies unusual time access patterns
+  - Monitors abnormal data volumes (3x normal threshold)
+  - Tracks access to new/suspicious destinations
+  - Detects lateral movement across internal networks
+  - Flags unusual protocol usage
+  - Risk scoring system (0-100) for threat prioritization
+  - 1-hour learning period for baseline establishment
+- 📊 **Enhanced Dashboard** - Now shows User Anomalies counter
+- 📚 **UBA Documentation** - Complete guide with testing instructions
+- 🎯 **Real-time Risk Assessment** - Dynamic risk scoring per IP/device
+
+### Changed
+- Updated detection engine initialization to include UBA
+- Improved alert handling with behavioral anomaly notifications
+- Enhanced statistics tracking with user behavior metrics
+
+### Technical Details
+- Profile tracking: Active hours, data patterns, destinations, protocols
+- Memory-efficient design with 5-minute activity windows
+- Configurable thresholds in config.js
+- Integration with existing detection pipeline
+
 ## [1.0.0] - 2025-10-12
 
 ### Added

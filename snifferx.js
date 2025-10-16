@@ -16,6 +16,7 @@ const CaptureManager = require('./src/capture/captureManager');
 const DDoSDetector = require('./src/detection/ddosDetector');
 const PortScanDetector = require('./src/detection/portScanDetector');
 const IPSpoofingDetector = require('./src/detection/ipSpoofingDetector');
+const UserBehaviorAnalytics = require('./src/detection/userBehaviorAnalytics');
 const utils = require('./utils');
 
 // ASCII Art Banner
@@ -44,7 +45,8 @@ let stats = {
     alerts: {
         ddos: 0,
         portScan: 0,
-        ipSpoofing: 0
+        ipSpoofing: 0,
+        userBehavior: 0
     },
     protocols: {},
     topTalkers: {}
@@ -71,13 +73,14 @@ function displayDashboard() {
     console.log(`  ${chalk.white('Status:')}        ${chalk.green('● ACTIVE')}`);
     
     // Threat Alerts
-    const totalAlerts = stats.alerts.ddos + stats.alerts.portScan + stats.alerts.ipSpoofing;
+    const totalAlerts = stats.alerts.ddos + stats.alerts.portScan + stats.alerts.ipSpoofing + stats.alerts.userBehavior;
     console.log(chalk.bold.red('\n🚨 Threat Detection'));
     console.log(chalk.gray('───────────────────────────────────────────────────────────'));
     console.log(`  ${chalk.white('Total Alerts:')}   ${totalAlerts > 0 ? chalk.red(totalAlerts) : chalk.green('0')}`);
     console.log(`  ${chalk.white('DDoS Attacks:')}   ${stats.alerts.ddos > 0 ? chalk.red(stats.alerts.ddos) : chalk.gray('0')}`);
     console.log(`  ${chalk.white('Port Scans:')}     ${stats.alerts.portScan > 0 ? chalk.red(stats.alerts.portScan) : chalk.gray('0')}`);
     console.log(`  ${chalk.white('IP Spoofing:')}    ${stats.alerts.ipSpoofing > 0 ? chalk.red(stats.alerts.ipSpoofing) : chalk.gray('0')}`);
+    console.log(`  ${chalk.white('User Anomalies:')} ${stats.alerts.userBehavior > 0 ? chalk.red(stats.alerts.userBehavior) : chalk.gray('0')}`);
     
     // Protocol Distribution
     const protocols = Object.entries(stats.protocols)
@@ -129,6 +132,7 @@ function handlePacket(packet, detectors) {
     const ddosAlert = detectors.ddos.analyze(packet);
     const portScanAlert = detectors.portScan.analyze(packet);
     const spoofingAlert = detectors.ipSpoofing.analyze(packet);
+    const userBehaviorAlert = detectors.userBehavior.analyze(packet);
     
     // Handle alerts
     if (ddosAlert) {
@@ -157,6 +161,15 @@ function handlePacket(packet, detectors) {
         console.log(chalk.gray(`Time: ${utils.getFormattedTimestamp()}`));
         console.log(chalk.magenta('─'.repeat(70)));
     }
+    
+    if (userBehaviorAlert) {
+        stats.alerts.userBehavior++;
+        console.log('\n' + chalk.cyan.bold('👤 BEHAVIORAL ANOMALY!'));
+        console.log(chalk.cyan('─'.repeat(70)));
+        console.log(userBehaviorAlert.message);
+        console.log(chalk.gray(`Time: ${utils.getFormattedTimestamp()}`));
+        console.log(chalk.cyan('─'.repeat(70)));
+    }
 }
 
 /**
@@ -171,12 +184,14 @@ async function startMonitoring(interfaceId, options) {
     const detectors = {
         ddos: new DDoSDetector(config),
         portScan: new PortScanDetector(config),
-        ipSpoofing: new IPSpoofingDetector(config)
+        ipSpoofing: new IPSpoofingDetector(config),
+        userBehavior: new UserBehaviorAnalytics(config)
     };
     
     console.log(chalk.green('  ✓ DDoS Detector loaded'));
     console.log(chalk.green('  ✓ Port Scan Detector loaded'));
     console.log(chalk.green('  ✓ IP Spoofing Detector loaded'));
+    console.log(chalk.green('  ✓ User Behavior Analytics loaded'));
     
     console.log(chalk.cyan.bold('\n🚀 Starting Packet Capture...\n'));
     
@@ -217,12 +232,13 @@ async function startMonitoring(interfaceId, options) {
         console.log(chalk.gray('  Total Packets:   ') + chalk.cyan(captureStats.totalPackets.toLocaleString()));
         console.log(chalk.gray('  Average Rate:    ') + chalk.cyan(captureStats.packetsPerSecond + ' pps'));
         
-        const totalAlerts = stats.alerts.ddos + stats.alerts.portScan + stats.alerts.ipSpoofing;
+        const totalAlerts = stats.alerts.ddos + stats.alerts.portScan + stats.alerts.ipSpoofing + stats.alerts.userBehavior;
         console.log(chalk.white('\nThreat Summary:'));
         console.log(chalk.gray('  Total Alerts:    ') + (totalAlerts > 0 ? chalk.red(totalAlerts) : chalk.green('0')));
         console.log(chalk.gray('  DDoS Attacks:    ') + (stats.alerts.ddos > 0 ? chalk.red(stats.alerts.ddos) : chalk.green('0')));
         console.log(chalk.gray('  Port Scans:      ') + (stats.alerts.portScan > 0 ? chalk.red(stats.alerts.portScan) : chalk.green('0')));
         console.log(chalk.gray('  IP Spoofing:     ') + (stats.alerts.ipSpoofing > 0 ? chalk.red(stats.alerts.ipSpoofing) : chalk.green('0')));
+        console.log(chalk.gray('  User Anomalies:  ') + (stats.alerts.userBehavior > 0 ? chalk.red(stats.alerts.userBehavior) : chalk.green('0')));
         
         console.log(chalk.cyan.bold('\n═══════════════════════════════════════════════════════════\n'));
         console.log(chalk.green('✓ Session ended successfully\n'));

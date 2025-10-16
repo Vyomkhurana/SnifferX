@@ -51,6 +51,16 @@ const config = {
             monitorProtocols: ['TCP', 'UDP', 'ICMP'],
             checkPayloadSize: true,
             unusualPortsAlert: true
+        },
+        userBehavior: {
+            enabled: true,
+            learningPeriod: 3600000,            // 1 hour learning period (in milliseconds)
+            dataThresholdMultiplier: 3,         // Alert if data > 3x normal
+            connectionThresholdMultiplier: 2.5, // Alert if connections > 2.5x normal
+            unusualTimeWindow: 120,             // Minutes for unusual time detection
+            minPacketsForProfile: 100,          // Minimum packets to create profile
+            riskScoreThreshold: 70,             // Alert if risk score > 70
+            exfiltrationThreshold: 10485760     // 10MB in short time = potential exfiltration
         }
     },
 
