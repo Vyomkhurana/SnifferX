@@ -17,6 +17,7 @@ const DDoSDetector = require('./src/detection/ddosDetector');
 const PortScanDetector = require('./src/detection/portScanDetector');
 const IPSpoofingDetector = require('./src/detection/ipSpoofingDetector');
 const UserBehaviorAnalytics = require('./src/detection/userBehaviorAnalytics');
+const AudioAlertSystem = require('./src/audio/audioAlertSystem');
 const utils = require('./utils');
 
 // ASCII Art Banner
@@ -137,6 +138,12 @@ function handlePacket(packet, detectors) {
     // Handle alerts
     if (ddosAlert) {
         stats.alerts.ddos++;
+        
+        // 🔊 PLAY AUDIO ALERT!
+        if (global.audioSystem) {
+            global.audioSystem.playAlert('ddos', ddosAlert.severity);
+        }
+        
         console.log('\n' + chalk.red.bold('🚨 THREAT DETECTED!'));
         console.log(chalk.red('─'.repeat(70)));
         console.log(ddosAlert.message);
@@ -146,6 +153,12 @@ function handlePacket(packet, detectors) {
     
     if (portScanAlert) {
         stats.alerts.portScan++;
+        
+        // 🔊 PLAY AUDIO ALERT!
+        if (global.audioSystem) {
+            global.audioSystem.playAlert('port_scan', portScanAlert.severity);
+        }
+        
         console.log('\n' + chalk.yellow.bold('⚠️  SUSPICIOUS ACTIVITY!'));
         console.log(chalk.yellow('─'.repeat(70)));
         console.log(portScanAlert.message);
@@ -155,6 +168,12 @@ function handlePacket(packet, detectors) {
     
     if (spoofingAlert) {
         stats.alerts.ipSpoofing++;
+        
+        // 🔊 PLAY AUDIO ALERT!
+        if (global.audioSystem) {
+            global.audioSystem.playAlert('ip_spoofing', spoofingAlert.severity);
+        }
+        
         console.log('\n' + chalk.magenta.bold('🎭 ANOMALY DETECTED!'));
         console.log(chalk.magenta('─'.repeat(70)));
         console.log(spoofingAlert.message);
@@ -164,6 +183,12 @@ function handlePacket(packet, detectors) {
     
     if (userBehaviorAlert) {
         stats.alerts.userBehavior++;
+        
+        // 🔊 PLAY AUDIO ALERT!
+        if (global.audioSystem) {
+            global.audioSystem.playAlert('user_behavior', userBehaviorAlert.severity);
+        }
+        
         console.log('\n' + chalk.cyan.bold('👤 BEHAVIORAL ANOMALY!'));
         console.log(chalk.cyan('─'.repeat(70)));
         console.log(userBehaviorAlert.message);
@@ -177,6 +202,12 @@ function handlePacket(packet, detectors) {
  */
 async function startMonitoring(interfaceId, options) {
     displayBanner();
+    
+    // 🔊 Initialize Audio Alert System (UNIQUE FEATURE!)
+    global.audioSystem = new AudioAlertSystem(config);
+    if (config.audio.playOnStartup) {
+        global.audioSystem.playStartupSound();
+    }
     
     console.log(chalk.cyan.bold('⚡ Initializing Detection Engines...\n'));
     
@@ -192,6 +223,7 @@ async function startMonitoring(interfaceId, options) {
     console.log(chalk.green('  ✓ Port Scan Detector loaded'));
     console.log(chalk.green('  ✓ IP Spoofing Detector loaded'));
     console.log(chalk.green('  ✓ User Behavior Analytics loaded'));
+    console.log(chalk.green('  ✓ Audio Alert System loaded 🔊'));
     
     console.log(chalk.cyan.bold('\n🚀 Starting Packet Capture...\n'));
     
@@ -219,6 +251,11 @@ async function startMonitoring(interfaceId, options) {
     process.on('SIGINT', () => {
         clearInterval(dashboardInterval);
         console.log(chalk.yellow('\n\n⚠️  Stopping capture...\n'));
+        
+        // Play shutdown sound
+        if (global.audioSystem && config.audio.playOnShutdown) {
+            global.audioSystem.playShutdownSound();
+        }
         
         const captureStats = manager.stop();
         
@@ -334,6 +371,56 @@ program
     .command('config')
     .description('Display current detection configuration')
     .action(showConfig);
+
+program
+    .command('test-audio')
+    .description('Test audio alert system with all sound patterns')
+    .action(() => {
+        displayBanner();
+        console.log(chalk.cyan.bold('🔊 Audio Alert System Test\n'));
+        
+        const audioSystem = new AudioAlertSystem(config);
+        
+        console.log(chalk.yellow('Testing all audio patterns...\n'));
+        
+        // Test startup sound
+        console.log(chalk.white('1️⃣  Startup Sound (Musical Chord)'));
+        audioSystem.playStartupSound();
+        
+        setTimeout(() => {
+            console.log(chalk.white('\n2️⃣  DDoS Alert (Rapid Beeps - High Severity)'));
+            audioSystem.playAlert('ddos', 'high');
+        }, 2000);
+        
+        setTimeout(() => {
+            console.log(chalk.white('\n3️⃣  Port Scan Alert (Medium Beeps - Medium Severity)'));
+            audioSystem.playAlert('port_scan', 'medium');
+        }, 5000);
+        
+        setTimeout(() => {
+            console.log(chalk.white('\n4️⃣  IP Spoofing Alert (Warbling Pattern - High Severity)'));
+            audioSystem.playAlert('ip_spoofing', 'high');
+        }, 8000);
+        
+        setTimeout(() => {
+            console.log(chalk.white('\n5️⃣  User Behavior Alert (Soft Beeps - Low Severity)'));
+            audioSystem.playAlert('user_behavior', 'low');
+        }, 11000);
+        
+        setTimeout(() => {
+            console.log(chalk.white('\n6️⃣  Emergency Alarm (Siren Pattern - Multiple Threats)'));
+            audioSystem.playEmergencyAlarm();
+        }, 14000);
+        
+        setTimeout(() => {
+            console.log(chalk.white('\n7️⃣  Shutdown Sound (Descending Melody)'));
+            audioSystem.playShutdownSound();
+            
+            console.log(chalk.green.bold('\n✓ Audio test complete!\n'));
+            console.log(chalk.gray('If you heard all the sounds, the audio system is working correctly.'));
+            console.log(chalk.gray('Note: Some systems may not support audio beeps.\n'));
+        }, 17000);
+    });
 
 // Parse arguments
 program.parse(process.argv);

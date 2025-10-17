@@ -64,6 +64,16 @@ const config = {
         }
     },
 
+    // Audio Alert System (UNIQUE FEATURE!)
+    audio: {
+        enabled: true,              // Enable/disable audio alerts
+        volume: 0.7,                // Volume level (0.0 - 1.0)
+        cooldown: 5000,             // Milliseconds between same alert sounds
+        playOnStartup: true,        // Play sound when SnifferX starts
+        playOnShutdown: true,       // Play sound when SnifferX stops
+        emergencyThreshold: 5       // Play emergency alarm if 5+ alerts in 10 seconds
+    },
+
     // Logging Settings
     logging: {
         enabled: true,
