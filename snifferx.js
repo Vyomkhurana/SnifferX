@@ -203,13 +203,19 @@ function handlePacket(packet, detectors) {
 async function startMonitoring(interfaceId, options) {
     displayBanner();
     
+    console.log(chalk.cyan.bold('🛡️  Starting Network Threat Detection\n'));
+    console.log(chalk.gray('Interface ID: ') + chalk.cyan(interfaceId));
+    console.log(chalk.gray('Time: ') + chalk.white(utils.getFormattedTimestamp()));
+    console.log(chalk.gray('Audio Alerts: ') + (config.audio.enabled ? chalk.green('Enabled 🔊') : chalk.yellow('Disabled')));
+    console.log();
+    
     // 🔊 Initialize Audio Alert System (UNIQUE FEATURE!)
     global.audioSystem = new AudioAlertSystem(config);
     if (config.audio.playOnStartup) {
         global.audioSystem.playStartupSound();
     }
     
-    console.log(chalk.cyan.bold('⚡ Initializing Detection Engines...\n'));
+    console.log(chalk.cyan.bold('⚡ Loading Detection Engines...\n'));
     
     // Initialize detectors
     const detectors = {
@@ -219,11 +225,11 @@ async function startMonitoring(interfaceId, options) {
         userBehavior: new UserBehaviorAnalytics(config)
     };
     
-    console.log(chalk.green('  ✓ DDoS Detector loaded'));
-    console.log(chalk.green('  ✓ Port Scan Detector loaded'));
-    console.log(chalk.green('  ✓ IP Spoofing Detector loaded'));
-    console.log(chalk.green('  ✓ User Behavior Analytics loaded'));
-    console.log(chalk.green('  ✓ Audio Alert System loaded 🔊'));
+    console.log(chalk.green('  ✓ DDoS Attack Detection'));
+    console.log(chalk.green('  ✓ Port Scanning Detection'));
+    console.log(chalk.green('  ✓ IP Spoofing Detection'));
+    console.log(chalk.green('  ✓ User Behavior Analytics'));
+    console.log(chalk.green('  ✓ Audio Alert System'));
     
     console.log(chalk.cyan.bold('\n🚀 Starting Packet Capture...\n'));
     
@@ -236,11 +242,26 @@ async function startMonitoring(interfaceId, options) {
     });
     
     // Start capture
-    stats.startTime = Date.now();
-    manager.start(interfaceId);
-    
-    console.log(chalk.green('  ✓ Capture started successfully'));
-    console.log(chalk.gray(`  ✓ Monitoring interface: ${interfaceId || 'default'}\n`));
+    try {
+        stats.startTime = Date.now();
+        manager.start(interfaceId);
+        
+        console.log(chalk.green('  ✓ Capture started successfully'));
+        console.log(chalk.gray(`  ✓ Monitoring interface ${interfaceId}\n`));
+        console.log(chalk.cyan('─'.repeat(70)));
+        console.log(chalk.white.bold('  STATUS: ') + chalk.green('MONITORING ACTIVE'));
+        console.log(chalk.gray('  Press ') + chalk.cyan('Ctrl+C') + chalk.gray(' to stop and view final report'));
+        console.log(chalk.cyan('─'.repeat(70)) + '\n');
+        
+    } catch (error) {
+        console.log(chalk.red('\n✗ Failed to start capture\n'));
+        console.log(chalk.yellow('Possible causes:'));
+        console.log(chalk.white('  • Invalid interface ID'));
+        console.log(chalk.white('  • Insufficient permissions (try running as Administrator/sudo)'));
+        console.log(chalk.white('  • Wireshark/tshark not installed correctly\n'));
+        console.log(chalk.white('Run ') + chalk.cyan('snifferx interfaces') + chalk.white(' to see available interfaces\n'));
+        process.exit(1);
+    }
     
     // Display dashboard every 3 seconds
     const dashboardInterval = setInterval(() => {
@@ -349,13 +370,24 @@ program
     .command('monitor')
     .description('Start real-time network monitoring and threat detection')
     .option('-i, --interface <id>', 'Network interface ID to monitor')
-    .action((options) => {
+    .option('-q, --quiet', 'Reduce output verbosity')
+    .option('--no-audio', 'Disable audio alerts')
+    .action(async (options) => {
         if (!options.interface) {
-            console.log(chalk.red('\n✗ Error: Interface ID required\n'));
-            console.log(chalk.white('Use: ') + chalk.cyan('snifferx interfaces') + chalk.white(' to list available interfaces'));
-            console.log(chalk.white('Then: ') + chalk.cyan('snifferx monitor -i <id>\n'));
+            displayBanner();
+            console.log(chalk.red('✗ Error: Network interface not specified\n'));
+            console.log(chalk.white.bold('How to fix:\n'));
+            console.log(chalk.white('  1. Run ') + chalk.cyan('snifferx interfaces') + chalk.white(' to see available interfaces'));
+            console.log(chalk.white('  2. Then run ') + chalk.cyan('snifferx monitor -i <id>') + chalk.white(' with your interface ID\n'));
+            console.log(chalk.yellow('💡 Quick start: ') + chalk.cyan('snifferx auto') + chalk.white(' to auto-detect your interface\n'));
             process.exit(1);
         }
+        
+        // Disable audio if --no-audio flag is used
+        if (options.audio === false) {
+            config.audio.enabled = false;
+        }
+        
         startMonitoring(options.interface, options);
     });
 
@@ -363,18 +395,21 @@ program
 program
     .command('interfaces')
     .alias('list')
-    .description('List available network interfaces')
+    .alias('ls')
+    .description('List all available network interfaces on your computer')
     .action(listInterfaces);
 
 // Config command
 program
     .command('config')
-    .description('Display current detection configuration')
+    .alias('settings')
+    .description('Display current threat detection configuration')
     .action(showConfig);
 
 program
     .command('test-audio')
-    .description('Test audio alert system with all sound patterns')
+    .alias('audio-test')
+    .description('Test audio alert system - plays all threat sounds')
     .action(() => {
         displayBanner();
         console.log(chalk.cyan.bold('🔊 Audio Alert System Test\n'));
@@ -422,12 +457,125 @@ program
         }, 17000);
     });
 
-// Parse arguments
-program.parse(process.argv);
+// Quick Start command (interactive mode)
+program
+    .command('start')
+    .description('Quick start with guided setup (recommended for first-time users)')
+    .action(async () => {
+        displayBanner();
+        console.log(chalk.cyan.bold('🚀 Quick Start - Guided Setup\n'));
+        
+        console.log(chalk.white('This wizard will help you get started with SnifferX.\n'));
+        
+        // Step 1: List interfaces
+        console.log(chalk.cyan('Step 1: ') + chalk.white('Select your network interface\n'));
+        
+        try {
+            const interfaces = await CaptureManager.listInterfaces();
+            
+            console.log(chalk.gray('─'.repeat(70)));
+            interfaces.forEach(iface => {
+                console.log(`  ${chalk.cyan(iface.id.padEnd(3))} ${chalk.white('│')} ${chalk.green(iface.description || iface.name)}`);
+            });
+            console.log(chalk.gray('─'.repeat(70)));
+            
+            console.log(chalk.yellow('\n💡 Tip: ') + chalk.white('Usually, interface ') + chalk.cyan('7') + chalk.white(' or ') + chalk.cyan('8') + chalk.white(' is your main network adapter'));
+            console.log(chalk.white('\nTo start monitoring, run: ') + chalk.cyan('snifferx monitor -i <id>'));
+            console.log(chalk.gray('Example: ') + chalk.cyan('snifferx monitor -i 7\n'));
+            
+        } catch (error) {
+            console.log(chalk.red('✗ Error: ' + error.message + '\n'));
+        }
+    });
 
-// Show help if no command
+// Auto-detect and monitor
+program
+    .command('auto')
+    .description('Automatically detect and monitor the primary network interface')
+    .action(async () => {
+        displayBanner();
+        console.log(chalk.cyan.bold('🔍 Auto-detecting network interface...\n'));
+        
+        try {
+            const interfaces = await CaptureManager.listInterfaces();
+            
+            // Try to find the most likely interface (usually the one with the highest ID or "Ethernet"/"Wi-Fi" in name)
+            const primaryInterface = interfaces.find(i => 
+                i.description?.toLowerCase().includes('ethernet') || 
+                i.description?.toLowerCase().includes('wi-fi') ||
+                i.description?.toLowerCase().includes('wireless')
+            ) || interfaces[interfaces.length - 1];
+            
+            if (primaryInterface) {
+                console.log(chalk.green('✓ Found interface: ') + chalk.cyan(primaryInterface.description || primaryInterface.name));
+                console.log(chalk.white('  Interface ID: ') + chalk.cyan(primaryInterface.id) + '\n');
+                
+                console.log(chalk.yellow('Starting monitoring in 3 seconds... (Press Ctrl+C to cancel)\n'));
+                
+                setTimeout(() => {
+                    startMonitoring(primaryInterface.id, {});
+                }, 3000);
+            } else {
+                console.log(chalk.red('✗ No network interfaces found\n'));
+                console.log(chalk.white('Please run: ') + chalk.cyan('snifferx interfaces') + chalk.white(' to see available interfaces\n'));
+            }
+        } catch (error) {
+            console.log(chalk.red('✗ Error: ' + error.message + '\n'));
+        }
+    });
+
+// Help command with examples
+program
+    .command('help')
+    .description('Show detailed help with examples')
+    .action(() => {
+        displayBanner();
+        console.log(chalk.cyan.bold('📖 SnifferX Help & Examples\n'));
+        
+        console.log(chalk.white.bold('QUICK START:\n'));
+        console.log(chalk.gray('  For first-time users:'));
+        console.log(chalk.cyan('    snifferx start') + chalk.gray('           # Guided setup wizard'));
+        console.log(chalk.cyan('    snifferx auto') + chalk.gray('            # Auto-detect and start\n'));
+        
+        console.log(chalk.white.bold('BASIC COMMANDS:\n'));
+        console.log(chalk.cyan('    snifferx interfaces') + chalk.gray('    # List network adapters'));
+        console.log(chalk.cyan('    snifferx monitor -i 7') + chalk.gray('   # Monitor interface 7'));
+        console.log(chalk.cyan('    snifferx config') + chalk.gray('         # Show detection settings'));
+        console.log(chalk.cyan('    snifferx test-audio') + chalk.gray('     # Test audio alerts\n'));
+        
+        console.log(chalk.white.bold('EXAMPLES:\n'));
+        console.log(chalk.gray('  Monitor your Wi-Fi adapter:'));
+        console.log(chalk.cyan('    snifferx monitor -i 7\n'));
+        
+        console.log(chalk.gray('  List all network interfaces:'));
+        console.log(chalk.cyan('    snifferx interfaces\n'));
+        
+        console.log(chalk.gray('  Test if audio alerts work:'));
+        console.log(chalk.cyan('    snifferx test-audio\n'));
+        
+        console.log(chalk.white.bold('NEED HELP?\n'));
+        console.log(chalk.gray('  Documentation: ') + chalk.cyan('https://github.com/Vyomkhurana/SnifferX'));
+        console.log(chalk.gray('  Issues: ') + chalk.cyan('https://github.com/Vyomkhurana/SnifferX/issues\n'));
+    });
+
+// Show friendly welcome if no command
 if (process.argv.length === 2) {
     displayBanner();
-    console.log(chalk.yellow('⚠️  No command specified\n'));
-    program.help();
+    console.log(chalk.cyan.bold('👋 Welcome to SnifferX!\n'));
+    console.log(chalk.white('A professional network threat detection tool.\n'));
+    
+    console.log(chalk.white.bold('QUICK START:\n'));
+    console.log(chalk.cyan('  snifferx start') + chalk.gray('           # Guided setup (recommended for beginners)'));
+    console.log(chalk.cyan('  snifferx auto') + chalk.gray('            # Auto-detect and start monitoring\n'));
+    
+    console.log(chalk.white.bold('COMMON COMMANDS:\n'));
+    console.log(chalk.cyan('  snifferx interfaces') + chalk.gray('    # List available network interfaces'));
+    console.log(chalk.cyan('  snifferx monitor -i 7') + chalk.gray('   # Start monitoring interface 7'));
+    console.log(chalk.cyan('  snifferx help') + chalk.gray('           # Show detailed help with examples\n'));
+    
+    console.log(chalk.yellow('💡 Tip: ') + chalk.white('Run ') + chalk.cyan('snifferx start') + chalk.white(' for a guided setup\n'));
+    process.exit(0);
 }
+
+// Parse arguments
+program.parse(process.argv);

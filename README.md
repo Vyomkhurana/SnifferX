@@ -118,32 +118,33 @@ npm install
 
 ## Usage
 
-### Quick Start
+### Quick Start (Beginner-Friendly)
 
 ```bash
-# List available network interfaces
-node snifferx.js interfaces
+# Option 1: Guided Setup Wizard (Recommended for first-time users)
+node snifferx.js start
 
-# Start monitoring on a specific interface
-sudo node snifferx.js monitor -i <interface-id>
+# Option 2: Auto-detect your network interface and start
+node snifferx.js auto
 
-# View current configuration
-node snifferx.js config
-
-# Test audio alert system
-node snifferx.js test-audio
+# Option 3: Manual setup
+node snifferx.js interfaces        # List interfaces
+node snifferx.js monitor -i 7      # Start monitoring interface 7
 ```
 
 ### Command Reference
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `interfaces` | List all network interfaces | `node snifferx.js interfaces` |
-| `monitor -i <id>` | Start monitoring on interface | `sudo node snifferx.js monitor -i 7` |
-| `config` | Display detection configuration | `node snifferx.js config` |
-| `test-audio` | Test audio alert system | `node snifferx.js test-audio` |
-| `--help` | Show help menu | `node snifferx.js --help` |
-| `--version` | Show version | `node snifferx.js --version` |
+| Command | Aliases | Description | Example |
+|---------|---------|-------------|---------|
+| `start` | - | Guided setup wizard | `node snifferx.js start` |
+| `auto` | - | Auto-detect and monitor | `node snifferx.js auto` |
+| `interfaces` | `list`, `ls` | List all network interfaces | `node snifferx.js interfaces` |
+| `monitor -i <id>` | - | Start monitoring interface | `sudo node snifferx.js monitor -i 7` |
+| `monitor --no-audio` | - | Monitor without audio alerts | `node snifferx.js monitor -i 7 --no-audio` |
+| `config` | `settings` | Display detection configuration | `node snifferx.js config` |
+| `test-audio` | `audio-test` | Test audio alert system | `node snifferx.js test-audio` |
+| `help` | - | Detailed help with examples | `node snifferx.js help` |
+| `--version` | `-V` | Show version | `node snifferx.js --version` |
 
 ### Live Dashboard
 
