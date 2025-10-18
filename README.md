@@ -1,414 +1,362 @@
-# SnifferX 🛡️
+<div align="center">
 
+# SnifferX
 
+### Professional Network Threat Detection & Analysis Tool
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)A powerful network traffic analyzer for cybersecurity analysis and threat detection.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)]()
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/Vyomkhurana/SnifferX)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Vyomkhurana/SnifferX/pulls)
 
-[![Node.js](https://img.shields.io/badge/node.js-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org/)
+Real-time network traffic monitoring with advanced threat detection capabilities. Detect DDoS attacks, port scanning, IP spoofing, and behavioral anomalies with live audio alerts.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](package.json)![License](https://img.shields.io/badge/license-ISC-blue.svg)
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Documentation](#documentation) • [Contributing](#contributing)
 
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/Vyomkhurana/SnifferX)![Node.js](https://img.shields.io/badge/node.js-%3E%3D14.0.0-brightgreen.svg)
-
-![Status](https://img.shields.io/badge/status-in%20development-yellow.svg)
-
-**Professional Network Threat Detection & Analysis Tool**![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-
-
-
-Real-time network traffic monitoring with advanced threat detection capabilities. Detect DDoS attacks, port scanning, IP spoofing, and suspicious network activities.## 🚀 About
-
-
-
-```SnifferX is a network traffic analysis tool designed to capture, analyze, and detect malicious network activities in real-time. Built with Node.js for efficient packet processing and real-time analysis. This project showcases advanced cybersecurity concepts and network monitoring techniques.
-
-    ███████╗███╗   ██╗██╗███████╗███████╗███████╗██████╗ ██╗  ██╗
-
-    ██╔════╝████╗  ██║██║██╔════╝██╔════╝██╔════╝██╔══██╗╚██╗██╔╝## ✨ Features
-
-    ███████╗██╔██╗ ██║██║█████╗  █████╗  █████╗  ██████╔╝ ╚███╔╝ 
-
-    ╚════██║██║╚██╗██║██║██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗ ██╔██╗ ### Current Features ✓
-
-    ███████║██║ ╚████║██║██║     ██║     ███████╗██║  ██║██╔╝ ██╗- 🎨 **Interactive CLI** - Beautiful command-line interface with ASCII banner
-
-    ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝- ⚙️ **Configuration System** - Comprehensive settings for detection thresholds
-
-    - 📝 **Advanced Logging** - Color-coded logging with timestamps
-
-    Network Threat Detection & Analysis Tool v1.0.0- 🛠️ **Utility Functions** - Network analysis helpers (IP validation, packet rate calculation, etc.)
-
-```- 📁 **Auto Directory Setup** - Automatic creation of logs and exports directories
-
-- 📊 **System Information Display** - Real-time system stats and configuration status
+</div>
 
 ---
 
-### Planned Features 🔜
+## Overview
 
-## 🚀 Quick Start- 📡 **Packet Capture** - Real-time network traffic capture using pcap
+SnifferX is a command-line network security monitoring tool built with Node.js that provides real-time threat detection and analysis. It captures network traffic, analyzes patterns, and alerts you to potential security threats including DDoS attacks, port scans, IP spoofing attempts, and unusual user behavior.
 
-- ⚡ **Real-time Traffic Analysis** - Live monitoring and analysis
+**What makes SnifferX unique:**
+- First network monitor with real-time audio threat alerts
+- Professional CLI with live monitoring dashboard
+- Cross-platform support (Windows, Linux, macOS)
+- Machine learning-based user behavior analytics
+- Zero-dependency packet analysis engine
 
-```bash- �️ **DDoS Detection** - Identify distributed denial of service attacks
+---
 
-# Clone repository- 🎭 **IP Spoofing Detection** - Detect spoofed IP addresses
+## Features
 
-git clone https://github.com/Vyomkhurana/SnifferX.git- ⚠️ **Suspicious Activity Monitoring** - Real-time threat detection
+### Detection Engines
 
-cd SnifferX- 📊 **Traffic Visualization** - Graphical network analysis dashboard
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **DDoS Detection** | Real-time packet rate analysis and traffic volume monitoring | ✅ Active |
+| **Port Scan Detection** | Identifies reconnaissance attempts and systematic port probing | ✅ Active |
+| **IP Spoofing Detection** | TTL-based forgery detection and sequence validation | ✅ Active |
+| **User Behavior Analytics** | ML-based anomaly detection for unusual network patterns | ✅ Active |
+| **Audio Alert System** | Real-time sound notifications for different threat types | ✅ Active |
 
-- � **Port Scanning Detection** - Identify port scan attempts
+### Core Capabilities
 
-# Install- � **Protocol Analysis** - Deep packet inspection (TCP/UDP/ICMP)
+- **Live Dashboard** - Real-time statistics, protocol distribution, and threat monitoring
+- **High Performance** - Handles 1000+ packets per second with minimal CPU usage
+- **Configurable Thresholds** - Customizable detection sensitivity for different environments
+- **Professional CLI** - Commander.js-based interface with intuitive commands
+- **Cross-Platform** - Native support for Windows, Linux, and macOS
+- **Packet Analysis** - Deep inspection of TCP, UDP, ICMP, and other protocols
 
-chmod +x install.sh- 📤 **Export Capabilities** - Export data in JSON, CSV, and PCAP formats
+---
 
-./install.sh
+## Installation
 
-## 🛠️ Installation
+### Prerequisites
 
-# List interfaces
+- **Node.js** >= 14.0.0
+- **npm** or **yarn**
+- **Wireshark/tshark** (for packet capture)
+- **Administrator/root privileges** (for network monitoring)
 
-snifferx interfaces### Prerequisites
+### Platform-Specific Setup
 
-- Node.js >= 14.0.0
+<details>
+<summary><b>Windows</b></summary>
 
-# Start monitoring- npm or yarn
+```powershell
+# Install Node.js from https://nodejs.org/
+# Install Wireshark from https://www.wireshark.org/
 
-sudo snifferx monitor -i <interface-id>
+# Clone repository
+git clone https://github.com/Vyomkhurana/SnifferX.git
+cd SnifferX
 
-```### Setup
+# Install dependencies
+npm install
+```
+</details>
+
+<details>
+<summary><b>Linux/Ubuntu</b></summary>
 
 ```bash
-
----# Clone the repository
-
-git clone https://github.com/Vyomkhurana/SnifferX.git
-
-## ✨ Features
-
-# Navigate to project directory
-
-- **🛡️ DDoS Detection** - Real-time packet rate analysiscd SnifferX
-
-- **🔍 Port Scan Detection** - Identifies reconnaissance attempts
-
-- **🎭 IP Spoofing Detection** - TTL-based forgery detection# Install dependencies
-
-- **📊 Live Dashboard** - Real-time statistics and alertsnpm install
-
-- **🌐 Cross-Platform** - Windows, Linux, macOS support
-
-- **⚡ High Performance** - Handles 1000+ packets/second# Run the application
-
-- **🎯 Professional CLI** - Metasploit-style interfacenpm start
-
-```
-
----
-
-## 💻 Usage
-
-## 📦 Installation
-
-### Start the application
-
-### Automated (Recommended)```bash
-
-npm start
-
-```bash# or
-
-git clone https://github.com/Vyomkhurana/SnifferX.gitnode index.js
-
-cd SnifferX```
-
-chmod +x install.sh
-
-./install.sh### View help
-
-``````bash
-
-node index.js --help
-
-### Manual```
-
-
-
-**Linux/Ubuntu:**### Check version
-
-```bash```bash
-
-# Dependenciesnode index.js --version
-
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -```
-
+# Install dependencies
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs tshark
 
-## � Project Structure
+# Clone repository
+git clone https://github.com/Vyomkhurana/SnifferX.git
+cd SnifferX
 
-# Install
-
-git clone https://github.com/Vyomkhurana/SnifferX.git```
-
-cd SnifferXSnifferX/
-
-npm install├── config.js          # Configuration settings
-
-sudo npm link├── index.js           # Main application entry point
-
-```├── utils.js           # Utility functions
-
-├── package.json       # Project dependencies
-
-**macOS:**├── README.md          # Documentation
-
-```bash├── .gitignore         # Git ignore rules
-
-brew install node wireshark├── logs/              # Application logs (auto-created)
-
-git clone https://github.com/Vyomkhurana/SnifferX.git└── exports/           # Exported data (auto-created)
-
-cd SnifferX```
-
+# Install packages
 npm install
-
-sudo npm link## ⚙️ Configuration
-
 ```
+</details>
 
-The application can be configured through `config.js`:
+<details>
+<summary><b>macOS</b></summary>
 
-**Windows:**
+```bash
+# Install dependencies
+brew install node wireshark
 
-```powershell- **DDoS Detection**: Packet rate thresholds, connection limits
+# Clone repository
+git clone https://github.com/Vyomkhurana/SnifferX.git
+cd SnifferX
 
-# Install Node.js & Wireshark first- **IP Spoofing**: TTL variance checks, sequence validation
-
-git clone https://github.com/Vyomkhurana/SnifferX.git- **Port Scanning**: Port scan thresholds per minute
-
-cd SnifferX- **Logging**: Log levels, output directories
-
-npm install- **Analysis**: Export formats, real-time monitoring
-
-npm link
-
-```## �🔧 Technologies
-
-
-
----- **Node.js** - Runtime environment
-
-- **Chalk** - Terminal styling and colors
-
-## 🎯 Usage- **Commander.js** - CLI argument parsing
-
-- **fs-extra** - Enhanced file system operations
-
-```bash- **pcap** (planned) - Packet capture library
-
-# List interfaces
-
-snifferx interfaces## 🎯 Current Development Phase
-
-
-
-# Start monitoring✅ Phase 1: Project Initialization (Complete)
-
-sudo snifferx monitor -i 7- Project structure setup
-
-- Configuration system
-
-# View config- Utility functions
-
-snifferx config- Interactive CLI
-
-
-
-# Help🔄 Phase 2: Core Implementation (In Progress)
-
-snifferx --help- Packet capture module
-
-```- Detection algorithms
-
-- Analysis engine
+# Install packages
+npm install
+```
+</details>
 
 ---
 
-⏳ Phase 3: Advanced Features (Upcoming)
+## Usage
 
-## 📊 Live Dashboard Example- Visualization dashboard
+### Quick Start
 
-- Export functionality
+```bash
+# List available network interfaces
+node snifferx.js interfaces
 
-```- Alert system
+# Start monitoring on a specific interface
+sudo node snifferx.js monitor -i <interface-id>
 
+# View current configuration
+node snifferx.js config
+
+# Test audio alert system
+node snifferx.js test-audio
+```
+
+### Command Reference
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `interfaces` | List all network interfaces | `node snifferx.js interfaces` |
+| `monitor -i <id>` | Start monitoring on interface | `sudo node snifferx.js monitor -i 7` |
+| `config` | Display detection configuration | `node snifferx.js config` |
+| `test-audio` | Test audio alert system | `node snifferx.js test-audio` |
+| `--help` | Show help menu | `node snifferx.js --help` |
+| `--version` | Show version | `node snifferx.js --version` |
+
+### Live Dashboard
+
+When monitoring is active, you'll see a real-time dashboard:
+
+```
+═══════════════════════════════════════════════════════════
+                    LIVE MONITORING DASHBOARD
 ═══════════════════════════════════════════════════════════
 
-                    LIVE MONITORING DASHBOARD## 📊 Detection Capabilities (Planned)
-
-═══════════════════════════════════════════════════════════
-
-| Detection Type | Status | Threshold |
-
-📊 System Status|----------------|--------|-----------|
-
+📊 System Status
 ────────────────────────────────
-
-  Total Packets:  12,543| IP Spoofing | Planned | TTL variance check |
-
-  Packet Rate:    134.5 pps| Port Scanning | Planned | 100 ports/min |
-
-  Uptime:         93s| Suspicious Activity | Planned | Protocol-based |
-
+  Total Packets:  12,543
+  Packet Rate:    134.5 pps
+  Uptime:         93s
   Status:         ● ACTIVE
 
-## ⚠️ Important Disclaimer
-
 🚨 Threat Detection
-
-───────────────────────────────────────────────────────────**READ CAREFULLY BEFORE USE:**
-
+───────────────────────────────────────────────────────────
   Total Alerts:   2
-
-  DDoS Attacks:   1This tool is designed for **EDUCATIONAL** and **AUTHORIZED** security testing purposes only. 
-
+  DDoS Attacks:   1
   Port Scans:     1
+  IP Spoofing:    0
+  User Anomalies: 0
 
-  IP Spoofing:    0- ⚖️ Unauthorized network monitoring or packet capture may be **ILLEGAL** in your jurisdiction
-
-- 📜 Always obtain **proper authorization** before monitoring any network
-
-📡 Protocol Distribution- 🎓 Use only in **controlled environments** or with **explicit permission**
-
-───────────────────────────────────────────────────────────- ⚠️ The author is **NOT RESPONSIBLE** for any misuse of this software
-
+📡 Protocol Distribution
+───────────────────────────────────────────────────────────
   TCP      ████████████████████████ 65.3%
-
-  UDP      ████████ 21.4%**Use responsibly and ethically.**
-
+  UDP      ████████ 21.4%
   ICMP     ██ 8.1%
-
-## 🤝 Contributing
-
-🌐 Top Source IPs
-
-───────────────────────────────────────────────────────────Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Vyomkhurana/SnifferX/issues).
-
-  1. 192.168.1.100    → 3,245 packets
-
-  2. 142.250.185.46   → 1,876 packets## 📝 License
-
 ```
-
-This project is licensed under the ISC License.
 
 ---
 
-## 👨‍💻 Author
+## Configuration
 
-## 🔧 Configuration
-
-**Vyom Khurana**
-
-Edit `config.js` to customize thresholds:- GitHub: [@Vyomkhurana](https://github.com/Vyomkhurana)
-
-- Project Link: [SnifferX](https://github.com/Vyomkhurana/SnifferX)
+Edit `config.js` to customize detection thresholds:
 
 ```javascript
-
-detection: {## 🌟 Show Your Support
-
+detection: {
     ddos: {
-
-        packetsPerSecondThreshold: 1000,Give a ⭐️ if this project helped you learn about network security!
-
-        timeWindow: 60
-
-    },---
-
+        packetsPerSecondThreshold: 1000,    // Packets/sec to trigger alert
+        connectionsThreshold: 100,           // Max connections from single IP
+        timeWindow: 60                       // Analysis window (seconds)
+    },
     portScanning: {
-
-        distinctPortsThreshold: 20,*Built with ❤️ for cybersecurity education*
-
-        timeWindow: 60
-
-    },## 📄 License
-
+        portsPerMinute: 20,                 // Distinct ports threshold
+        timeWindow: 60                       // Detection window
+    },
     ipSpoofing: {
-
-        ttlVarianceThreshold: 40ISC
-
+        ttlVarianceThreshold: 40,           // TTL deviation tolerance
+        enableSequenceCheck: true            // TCP sequence validation
+    },
+    userBehavior: {
+        learningPhaseDuration: 3600,        // Learning phase (1 hour)
+        riskThreshold: 70                    // Risk score alert threshold
     }
+}
+```
+
+### Audio Configuration
+
+```javascript
+audio: {
+    enabled: true,                          // Enable/disable audio alerts
+    volume: 0.7,                            // Volume level (0.0-1.0)
+    cooldown: 5000,                         // Milliseconds between alerts
+    playOnStartup: true,                    // Startup sound
+    playOnShutdown: true,                   // Shutdown sound
+    emergencyThreshold: 5                   // Alerts for emergency siren
 }
 ```
 
 ---
 
-## 🧪 Testing
-
-```bash
-# Attack simulation
-sudo ./simulate-attacks.sh
-
-# Manual tests
-sudo hping3 --flood target-ip        # DDoS
-nmap -p 1-100 target-ip               # Port scan
-scapy> send(IP(src="...")/ICMP())    # IP spoofing
-```
-
----
-
-## 📁 Structure
+## Project Structure
 
 ```
 SnifferX/
-├── snifferx.js              # Main CLI
-├── config.js                # Configuration
+├── snifferx.js                 # Main CLI application
+├── config.js                   # Configuration settings
+├── utils.js                    # Utility functions
+├── package.json                # Dependencies
 ├── src/
-│   ├── capture/            # Packet capture
-│   ├── models/             # Data models
-│   └── detection/          # Detection engines
-├── docs/                   # Documentation
-└── scripts/                # Helper scripts
+│   ├── audio/
+│   │   └── audioAlertSystem.js     # Audio notification engine
+│   ├── capture/
+│   │   └── captureManager.js       # Packet capture handler
+│   ├── detection/
+│   │   ├── ddosDetector.js         # DDoS detection engine
+│   │   ├── portScanDetector.js     # Port scan detector
+│   │   ├── ipSpoofingDetector.js   # IP spoofing detector
+│   │   └── userBehaviorAnalytics.js # ML-based behavior analysis
+│   └── models/
+│       └── Packet.js               # Packet data model
+├── docs/                       # Documentation
+├── scripts/                    # Testing & simulation scripts
+└── logs/                       # Application logs (auto-created)
 ```
 
 ---
 
-## ⚠️ Legal Notice
+## Audio Alert System
 
-**FOR EDUCATIONAL & AUTHORIZED USE ONLY**
+SnifferX features a revolutionary audio alert system - the first network monitor with real-time sound-based threat notifications.
 
-Only use on networks you own or have permission to test. Unauthorized network monitoring may be illegal.
+### Sound Patterns
+
+| Threat Type | Pattern | Frequency | Duration |
+|-------------|---------|-----------|----------|
+| **DDoS Attack** | Rapid beeps | 1000-1200 Hz | 200-400ms |
+| **Port Scan** | Medium warble | 600-800 Hz | 300ms |
+| **IP Spoofing** | Alternating tones | 700-900 Hz | 200ms |
+| **User Behavior** | Soft beep | 600 Hz | 400ms |
+| **Emergency** | Siren pattern | 800-1200 Hz | Variable |
+
+### Special Sounds
+
+- **Startup**: Musical chord (A-C#-E)
+- **Shutdown**: Descending melody (E-C#-A)
+- **Emergency**: Multi-threat siren (5+ simultaneous alerts)
 
 ---
 
-## 👤 Author
+## Technologies
+
+- **Node.js** - Runtime environment
+- **Chalk** - Terminal styling and colors
+- **Commander.js** - CLI framework
+- **pcap-parser** - Packet capture parsing
+- **simple-statistics** - Statistical analysis
+- **fs-extra** - Enhanced file operations
+- **play-sound** - Audio playback
+
+---
+
+## Development Roadmap
+
+- [x] Core packet capture engine
+- [x] DDoS detection algorithm
+- [x] Port scan detection
+- [x] IP spoofing detection
+- [x] User behavior analytics
+- [x] Audio alert system
+- [x] Live monitoring dashboard
+- [ ] Web-based dashboard
+- [ ] Machine learning threat prediction
+- [ ] SIEM integration (Splunk, ELK)
+- [ ] Export to JSON/CSV/PCAP
+- [ ] Alert notification system (email, SMS)
+- [ ] Historical traffic analysis
+- [ ] Threat intelligence feeds
+
+---
+
+## Legal Notice
+
+**⚠️ IMPORTANT - READ BEFORE USE**
+
+This tool is designed for **EDUCATIONAL** and **AUTHORIZED SECURITY TESTING** purposes only.
+
+- Only use on networks you own or have explicit permission to monitor
+- Unauthorized network monitoring may violate local, state, or federal laws
+- The author is NOT responsible for any misuse of this software
+- Always obtain proper authorization before conducting security assessments
+- Use responsibly and ethically
+
+By using this software, you agree to use it only for legal and ethical purposes.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## Documentation
+
+For detailed documentation, visit the [docs](./docs) folder:
+
+- [Architecture Overview](./docs/ARCHITECTURE.md)
+- [Detection Algorithms](./docs/DETECTION.md)
+- [API Reference](./docs/API.md)
+- [Configuration Guide](./docs/CONFIG.md)
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Author
 
 **Vyom Khurana**
+
 - GitHub: [@Vyomkhurana](https://github.com/Vyomkhurana)
+- Project: [SnifferX](https://github.com/Vyomkhurana/SnifferX)
 
 ---
 
-## 📄 License
+<div align="center">
 
-MIT License - See [LICENSE](LICENSE)
+**If you found this project helpful, please consider giving it a ⭐**
 
----
+Made for cybersecurity education and research
 
-**Made with ❤️ for cybersecurity**
-
----
-
-## 🏁 Next Phase Roadmap
-
-SnifferX is evolving! The next phase will focus on:
-
-- **Advanced Analytics**: Machine learning-based anomaly detection, historical traffic analysis, and automated threat reporting (see `analytics/` folder).
-- **Community Collaboration**: Clear contributing guidelines, code of conduct, and security policy for open source growth.
-- **SIEM Integration**: Export alerts and traffic data to external dashboards and security platforms.
-- **Performance Optimization**: Faster packet processing and lower resource usage.
-- **Modular Architecture**: Easier extension for new detection algorithms and plugins.
-
-Want to contribute? See `CONTRIBUTING.md` and open a pull request!
+</div>
