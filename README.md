@@ -1,6 +1,6 @@
 <div align="center">
 
-# SnifferX
+# 🛡️ SnifferX
 
 ### Professional Network Threat Detection & Analysis Tool
 
@@ -9,31 +9,34 @@
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)]()
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/Vyomkhurana/SnifferX)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Vyomkhurana/SnifferX/pulls)
+[![Stars](https://img.shields.io/github/stars/Vyomkhurana/SnifferX?style=social)](https://github.com/Vyomkhurana/SnifferX/stargazers)
 
-Real-time network traffic monitoring with advanced threat detection capabilities. Detect DDoS attacks, port scanning, IP spoofing, and behavioral anomalies with live audio alerts.
+**Real-time network security monitoring with AI-powered threat detection and audio alerts**
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Documentation](#documentation) • [Contributing](#contributing)
+[Features](#features) • [Installation](#installation) • [Quick Start](#usage) • [Documentation](#documentation) • [Contributing](#contributing)
 
 </div>
 
 ---
 
-## Overview
+## 🎯 Overview
 
-SnifferX is a command-line network security monitoring tool built with Node.js that provides real-time threat detection and analysis. It captures network traffic, analyzes patterns, and alerts you to potential security threats including DDoS attacks, port scans, IP spoofing attempts, and unusual user behavior.
+SnifferX is an advanced network security monitoring tool that provides **real-time threat detection** with a unique audio alert system. Built with Node.js for high performance, it analyzes network traffic patterns and identifies security threats before they become problems.
 
-**What makes SnifferX unique:**
-- First network monitor with real-time audio threat alerts
-- Professional CLI with live monitoring dashboard
-- Cross-platform support (Windows, Linux, macOS)
-- Machine learning-based user behavior analytics
-- Zero-dependency packet analysis engine
+### Why SnifferX?
+
+✨ **Industry First** - Only network monitor with real-time audio threat notifications  
+⚡ **High Performance** - Process 1000+ packets/second with low CPU usage  
+🎯 **Smart Detection** - ML-powered behavior analytics catch anomalies others miss  
+🖥️ **Beautiful CLI** - Professional dashboard with live statistics  
+🌐 **Cross-Platform** - Native Windows, Linux, and macOS support  
+🔧 **Easy Setup** - Guided wizard and auto-detect for beginners
 
 ---
 
-## Features
+## ✨ Features
 
-### Detection Engines
+### 🔍 Detection Engines
 
 | Feature | Description | Status |
 |---------|-------------|--------|
@@ -43,7 +46,7 @@ SnifferX is a command-line network security monitoring tool built with Node.js t
 | **User Behavior Analytics** | ML-based anomaly detection for unusual network patterns | ✅ Active |
 | **Audio Alert System** | Real-time sound notifications for different threat types | ✅ Active |
 
-### Core Capabilities
+### 🚀 Core Capabilities
 
 - **Live Dashboard** - Real-time statistics, protocol distribution, and threat monitoring
 - **High Performance** - Handles 1000+ packets per second with minimal CPU usage
@@ -247,34 +250,57 @@ SnifferX/
 
 ---
 
-## Audio Alert System
+## 🔊 Audio Alert System
 
-SnifferX features a revolutionary audio alert system - the first network monitor with real-time sound-based threat notifications.
+SnifferX features a **revolutionary audio alert system** - the first network monitor with real-time sound-based threat notifications.
 
 ### Sound Patterns
 
-| Threat Type | Pattern | Frequency | Duration |
-|-------------|---------|-----------|----------|
-| **DDoS Attack** | Rapid beeps | 1000-1200 Hz | 200-400ms |
-| **Port Scan** | Medium warble | 600-800 Hz | 300ms |
-| **IP Spoofing** | Alternating tones | 700-900 Hz | 200ms |
-| **User Behavior** | Soft beep | 600 Hz | 400ms |
-| **Emergency** | Siren pattern | 800-1200 Hz | Variable |
+| Threat Type | Pattern | Frequency | Duration | Description |
+|-------------|---------|-----------|----------|-------------|
+| **DDoS Attack** | Rapid beeps | 1000-1200 Hz | 200-400ms | Urgent high-pitch alarm |
+| **Port Scan** | Medium warble | 600-800 Hz | 300ms | Attention-grabbing tone |
+| **IP Spoofing** | Alternating tones | 700-900 Hz | 200ms | Warbling alert |
+| **User Behavior** | Soft beep | 600 Hz | 400ms | Subtle notification |
+| **Emergency** | Siren pattern | 800-1200 Hz | Variable | Multiple threats detected |
 
 ### Special Sounds
 
-- **Startup**: Musical chord (A-C#-E)
-- **Shutdown**: Descending melody (E-C#-A)
+- **Startup**: Musical chord (A-C#-E) - System online
+- **Shutdown**: Descending melody (E-C#-A) - Graceful exit
 - **Emergency**: Multi-threat siren (5+ simultaneous alerts)
+
+**Configure audio settings in `config.js` to customize volume, cooldown, and alert preferences.**
 
 ---
 
-## Technologies
+## 🛠️ Technology Stack
 
-- **Node.js** - Runtime environment
-- **Chalk** - Terminal styling and colors
-- **Commander.js** - CLI framework
-- **pcap-parser** - Packet capture parsing
+| Category | Technologies |
+|----------|-------------|
+| **Runtime** | Node.js >= 14.0.0 |
+| **CLI Framework** | Commander.js |
+| **Styling** | Chalk (terminal colors) |
+| **Packet Capture** | tshark, pcap-parser |
+| **Audio System** | Native OS beep APIs |
+| **Statistics** | simple-statistics |
+| **File System** | fs-extra |
+
+**Built with modern JavaScript and zero external dependencies for core detection algorithms.**
+
+---
+
+## 📸 Screenshots
+
+### Live Monitoring Dashboard
+```
+Coming soon - Real-time dashboard with packet statistics and threat alerts
+```
+
+### Audio Alert Test
+```
+Coming soon - Audio alert system testing interface
+```
 - **simple-statistics** - Statistical analysis
 - **fs-extra** - Enhanced file operations
 - **play-sound** - Audio playback
@@ -316,19 +342,43 @@ By using this software, you agree to use it only for legal and ethical purposes.
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions from the community! Whether it's bug fixes, new features, or documentation improvements.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### How to Contribute
+
+1. **Fork** the repository
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
+5. Open a **Pull Request**
+
+### Development Setup
+
+```bash
+# Clone your fork
+git clone https://github.com/YOUR_USERNAME/SnifferX.git
+cd SnifferX
+
+# Install dependencies
+npm install
+
+# Run in development mode
+npm run dev
+```
+
+### Areas for Contribution
+
+- 🐛 Bug fixes and stability improvements
+- ✨ New detection algorithms
+- 📝 Documentation and tutorials
+- 🧪 Test coverage
+- 🌍 Internationalization
 
 ---
 
-## Documentation
+## 📚 Documentation
 
 For detailed documentation, visit the [docs](./docs) folder:
 
@@ -339,13 +389,25 @@ For detailed documentation, visit the [docs](./docs) folder:
 
 ---
 
-## License
+## 📋 Roadmap
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- [ ] Web-based dashboard UI
+- [ ] Export reports in PDF format
+- [ ] Integration with SIEM systems
+- [ ] Custom rule engine
+- [ ] Machine learning threat prediction
+- [ ] Mobile app for alerts
+- [ ] Cloud deployment support
 
 ---
 
-## Author
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author
 
 **Vyom Khurana**
 
@@ -354,10 +416,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+## 🙏 Acknowledgments
+
+- Built with Node.js and love for cybersecurity
+- Inspired by industry-standard SIEM tools
+- Special thanks to the open-source community
+
+---
+
 <div align="center">
 
-**If you found this project helpful, please consider giving it a ⭐**
+### ⭐ Star this repository if you find it helpful!
 
-Made for cybersecurity education and research
+**Made for cybersecurity education and research**
+
+[Report Bug](https://github.com/Vyomkhurana/SnifferX/issues) • [Request Feature](https://github.com/Vyomkhurana/SnifferX/issues)
 
 </div>
