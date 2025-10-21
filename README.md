@@ -45,15 +45,31 @@ SnifferX is an advanced network security monitoring tool that provides **real-ti
 | **IP Spoofing Detection** | TTL-based forgery detection and sequence validation | ✅ Active |
 | **User Behavior Analytics** | ML-based anomaly detection for unusual network patterns | ✅ Active |
 | **Audio Alert System** | Real-time sound notifications for different threat types | ✅ Active |
+| **Threat Visualization** | Color-coded live threat history with timestamps and severity | ✅ Active |
 
 ### 🚀 Core Capabilities
 
 - **Live Dashboard** - Real-time statistics, protocol distribution, and threat monitoring
+- **Threat History** - Color-coded timeline showing last 10 threats with severity levels
 - **High Performance** - Handles 1000+ packets per second with minimal CPU usage
 - **Configurable Thresholds** - Customizable detection sensitivity for different environments
 - **Professional CLI** - Commander.js-based interface with intuitive commands
 - **Cross-Platform** - Native support for Windows, Linux, and macOS
 - **Packet Analysis** - Deep inspection of TCP, UDP, ICMP, and other protocols
+
+### ⚡ Recent Threat Activity View
+
+The dashboard now shows a live threat history with:
+- 🔴 **Critical** - Immediate action required
+- 🟠 **High** - Serious threat detected
+- 🟡 **Medium** - Suspicious activity
+- 🟢 **Low** - Minor anomaly
+
+Each threat shows:
+- Timestamp of detection
+- Threat type (DDoS, Port Scan, IP Spoof, Behavior)
+- Source IP address
+- Detailed description
 
 ---
 

@@ -50,8 +50,27 @@ let stats = {
         userBehavior: 0
     },
     protocols: {},
-    topTalkers: {}
+    topTalkers: {},
+    threatHistory: [] // NEW: Store last 10 threats for visualization
 };
+
+// Threat history management
+function addThreatToHistory(threatType, severity, sourceIP, details) {
+    const threat = {
+        type: threatType,
+        severity: severity,
+        source: sourceIP,
+        details: details,
+        timestamp: new Date().toLocaleTimeString()
+    };
+    
+    stats.threatHistory.unshift(threat);
+    
+    // Keep only last 10 threats
+    if (stats.threatHistory.length > 10) {
+        stats.threatHistory.pop();
+    }
+}
 
 /**
  * Display live monitoring dashboard
@@ -111,6 +130,39 @@ function displayDashboard() {
         });
     }
     
+    // Threat History (NEW FEATURE!)
+    if (stats.threatHistory.length > 0) {
+        console.log(chalk.bold.yellow('\n⚡ Recent Threat Activity'));
+        console.log(chalk.gray('───────────────────────────────────────────────────────────'));
+        
+        stats.threatHistory.slice(0, 5).forEach((threat, index) => {
+            let icon = '⚠️ ';
+            let color = chalk.yellow;
+            
+            // Color code by severity
+            if (threat.severity === 'critical') {
+                icon = '🔴';
+                color = chalk.red.bold;
+            } else if (threat.severity === 'high') {
+                icon = '🟠';
+                color = chalk.red;
+            } else if (threat.severity === 'medium') {
+                icon = '🟡';
+                color = chalk.yellow;
+            } else {
+                icon = '🟢';
+                color = chalk.cyan;
+            }
+            
+            const typeLabel = threat.type === 'ddos' ? 'DDoS' : 
+                            threat.type === 'port_scan' ? 'Port Scan' :
+                            threat.type === 'ip_spoofing' ? 'IP Spoof' : 'Behavior';
+            
+            console.log(`  ${icon} ${color(`[${threat.timestamp}]`)} ${color.bold(typeLabel)} from ${chalk.cyan(threat.source)}`);
+            console.log(`     ${chalk.gray('↳ ' + threat.details)}`);
+        });
+    }
+    
     console.log(chalk.gray('\n───────────────────────────────────────────────────────────'));
     console.log(chalk.gray('Press Ctrl+C to stop monitoring\n'));
 }
@@ -139,6 +191,14 @@ function handlePacket(packet, detectors) {
     if (ddosAlert) {
         stats.alerts.ddos++;
         
+        // Add to threat history
+        addThreatToHistory(
+            'ddos',
+            ddosAlert.severity,
+            packet.srcIP || 'Unknown',
+            `${ddosAlert.packetsPerSecond} pps detected`
+        );
+        
         // 🔊 PLAY AUDIO ALERT!
         if (global.audioSystem) {
             global.audioSystem.playAlert('ddos', ddosAlert.severity);
@@ -153,6 +213,14 @@ function handlePacket(packet, detectors) {
     
     if (portScanAlert) {
         stats.alerts.portScan++;
+        
+        // Add to threat history
+        addThreatToHistory(
+            'port_scan',
+            portScanAlert.severity,
+            packet.srcIP || 'Unknown',
+            `Scanning ${portScanAlert.portsScanned || 'multiple'} ports`
+        );
         
         // 🔊 PLAY AUDIO ALERT!
         if (global.audioSystem) {
@@ -169,6 +237,14 @@ function handlePacket(packet, detectors) {
     if (spoofingAlert) {
         stats.alerts.ipSpoofing++;
         
+        // Add to threat history
+        addThreatToHistory(
+            'ip_spoofing',
+            spoofingAlert.severity,
+            packet.srcIP || 'Unknown',
+            `TTL anomaly detected`
+        );
+        
         // 🔊 PLAY AUDIO ALERT!
         if (global.audioSystem) {
             global.audioSystem.playAlert('ip_spoofing', spoofingAlert.severity);
@@ -183,6 +259,14 @@ function handlePacket(packet, detectors) {
     
     if (userBehaviorAlert) {
         stats.alerts.userBehavior++;
+        
+        // Add to threat history
+        addThreatToHistory(
+            'user_behavior',
+            userBehaviorAlert.severity,
+            userBehaviorAlert.user || 'Unknown',
+            `Risk score: ${userBehaviorAlert.riskScore || 'N/A'}`
+        );
         
         // 🔊 PLAY AUDIO ALERT!
         if (global.audioSystem) {
