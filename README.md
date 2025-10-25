@@ -51,11 +51,27 @@ SnifferX is an advanced network security monitoring tool that provides **real-ti
 
 - **Live Dashboard** - Real-time statistics, protocol distribution, and threat monitoring
 - **Threat History** - Color-coded timeline showing last 10 threats with severity levels
+- **Auto-Export** - Automatic session data export to JSON and CSV formats
 - **High Performance** - Handles 1000+ packets per second with minimal CPU usage
 - **Configurable Thresholds** - Customizable detection sensitivity for different environments
 - **Professional CLI** - Commander.js-based interface with intuitive commands
 - **Cross-Platform** - Native support for Windows, Linux, and macOS
 - **Packet Analysis** - Deep inspection of TCP, UDP, ICMP, and other protocols
+
+### 📊 Session Export & Reporting
+
+Every monitoring session is automatically exported when you stop:
+- **JSON format** - Complete session data, statistics, and threat details
+- **CSV format** - Threat timeline for spreadsheet analysis
+- **Automatic timestamps** - Easy to track and compare sessions
+- **Export history** - View all past sessions with `snifferx exports`
+
+Exported data includes:
+- Session metadata (start/end time, duration, interface)
+- Traffic statistics (packets, rates, protocols)
+- Complete threat history with timestamps
+- Top talkers (source IPs)
+- Protocol distribution
 
 ### ⚡ Recent Threat Activity View
 
@@ -161,6 +177,7 @@ node snifferx.js monitor -i 7      # Start monitoring interface 7
 | `monitor -i <id>` | - | Start monitoring interface | `sudo node snifferx.js monitor -i 7` |
 | `monitor --no-audio` | - | Monitor without audio alerts | `node snifferx.js monitor -i 7 --no-audio` |
 | `config` | `settings` | Display detection configuration | `node snifferx.js config` |
+| `exports` | `history` | View exported session reports | `node snifferx.js exports` |
 | `test-audio` | `audio-test` | Test audio alert system | `node snifferx.js test-audio` |
 | `help` | - | Detailed help with examples | `node snifferx.js help` |
 | `--version` | `-V` | Show version | `node snifferx.js --version` |

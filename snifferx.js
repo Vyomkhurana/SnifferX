@@ -383,6 +383,57 @@ async function startMonitoring(interfaceId, options) {
         console.log(chalk.gray('  User Anomalies:  ') + (stats.alerts.userBehavior > 0 ? chalk.red(stats.alerts.userBehavior) : chalk.green('0')));
         
         console.log(chalk.cyan.bold('\n═══════════════════════════════════════════════════════════\n'));
+        
+        // Export session data
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Create exports directory if it doesn't exist
+            const exportDir = path.join(__dirname, 'exports');
+            if (!fs.existsSync(exportDir)) {
+                fs.mkdirSync(exportDir, { recursive: true });
+            }
+            
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const sessionData = {
+                session: {
+                    startTime: new Date(stats.startTime).toISOString(),
+                    endTime: new Date().toISOString(),
+                    duration: captureStats.duration,
+                    interface: interfaceId
+                },
+                statistics: {
+                    totalPackets: captureStats.totalPackets,
+                    packetsPerSecond: captureStats.packetsPerSecond,
+                    totalAlerts: totalAlerts,
+                    alertsByType: stats.alerts
+                },
+                threats: stats.threatHistory,
+                protocols: stats.protocols,
+                topTalkers: stats.topTalkers
+            };
+            
+            // Save as JSON
+            const jsonFile = path.join(exportDir, `session-${timestamp}.json`);
+            fs.writeFileSync(jsonFile, JSON.stringify(sessionData, null, 2));
+            
+            // Save as CSV
+            const csvFile = path.join(exportDir, `threats-${timestamp}.csv`);
+            let csvContent = 'Timestamp,Type,Severity,Source IP,Details\n';
+            stats.threatHistory.forEach(threat => {
+                csvContent += `${threat.timestamp},${threat.type},${threat.severity},${threat.source},"${threat.details}"\n`;
+            });
+            fs.writeFileSync(csvFile, csvContent);
+            
+            console.log(chalk.green('✓ Session data exported'));
+            console.log(chalk.gray('  JSON: ') + chalk.cyan(jsonFile));
+            console.log(chalk.gray('  CSV:  ') + chalk.cyan(csvFile));
+            console.log();
+        } catch (error) {
+            console.log(chalk.yellow('⚠️  Failed to export session data: ' + error.message + '\n'));
+        }
+        
         console.log(chalk.green('✓ Session ended successfully\n'));
         
         process.exit(0);
@@ -489,6 +540,58 @@ program
     .alias('settings')
     .description('Display current threat detection configuration')
     .action(showConfig);
+
+// Export history command
+program
+    .command('exports')
+    .alias('history')
+    .description('View exported session history and threat reports')
+    .action(() => {
+        displayBanner();
+        console.log(chalk.cyan.bold('📊 Exported Session History\n'));
+        
+        const fs = require('fs');
+        const path = require('path');
+        const exportDir = path.join(__dirname, 'exports');
+        
+        try {
+            if (!fs.existsSync(exportDir)) {
+                console.log(chalk.yellow('No exported sessions found.\n'));
+                console.log(chalk.gray('Sessions are automatically exported when you stop monitoring.\n'));
+                return;
+            }
+            
+            const files = fs.readdirSync(exportDir)
+                .filter(f => f.endsWith('.json'))
+                .sort()
+                .reverse();
+            
+            if (files.length === 0) {
+                console.log(chalk.yellow('No exported sessions found.\n'));
+                return;
+            }
+            
+            console.log(chalk.gray('─'.repeat(70)));
+            files.slice(0, 10).forEach((file, index) => {
+                const filePath = path.join(exportDir, file);
+                const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                const stats = fs.statSync(filePath);
+                
+                console.log(chalk.cyan(`\n${index + 1}. ${file}`));
+                console.log(chalk.gray('   Date: ') + chalk.white(new Date(data.session.startTime).toLocaleString()));
+                console.log(chalk.gray('   Duration: ') + chalk.white(data.session.duration));
+                console.log(chalk.gray('   Packets: ') + chalk.white(data.statistics.totalPackets.toLocaleString()));
+                console.log(chalk.gray('   Threats: ') + (data.statistics.totalAlerts > 0 ? chalk.red(data.statistics.totalAlerts) : chalk.green('0')));
+                console.log(chalk.gray('   Size: ') + chalk.white((stats.size / 1024).toFixed(2) + ' KB'));
+            });
+            console.log(chalk.gray('\n─'.repeat(70)));
+            console.log(chalk.gray(`\nShowing ${Math.min(files.length, 10)} of ${files.length} sessions`));
+            console.log(chalk.gray('Location: ') + chalk.cyan(exportDir) + '\n');
+            
+        } catch (error) {
+            console.log(chalk.red('✗ Error reading exports: ' + error.message + '\n'));
+        }
+    });
 
 program
     .command('test-audio')
