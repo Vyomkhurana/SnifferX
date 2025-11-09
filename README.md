@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ SnifferX
+# SnifferX
 
 ### Professional Network Threat Detection & Analysis Tool
 
@@ -19,35 +19,35 @@
 
 ---
 
-## 🎯 Overview
+## Overview
 
 SnifferX is an advanced network security monitoring tool that provides **real-time threat detection** with a unique audio alert system. Built with Node.js for high performance, it analyzes network traffic patterns and identifies security threats before they become problems.
 
 ### Why SnifferX?
 
-✨ **Industry First** - Only network monitor with real-time audio threat notifications  
-⚡ **High Performance** - Process 1000+ packets/second with low CPU usage  
-🎯 **Smart Detection** - ML-powered behavior analytics catch anomalies others miss  
-🖥️ **Beautiful CLI** - Professional dashboard with live statistics  
-🌐 **Cross-Platform** - Native Windows, Linux, and macOS support  
-🔧 **Easy Setup** - Guided wizard and auto-detect for beginners
+**Industry First** - Only network monitor with real-time audio threat notifications  
+**High Performance** - Process 1000+ packets/second with low CPU usage  
+**Smart Detection** - ML-powered behavior analytics catch anomalies others miss  
+**Beautiful CLI** - Professional dashboard with live statistics  
+**Cross-Platform** - Native Windows, Linux, and macOS support  
+**Easy Setup** - Guided wizard and auto-detect for beginners
 
 ---
 
-## ✨ Features
+## Features
 
-### 🔍 Detection Engines
+### Detection Engines
 
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **DDoS Detection** | Real-time packet rate analysis and traffic volume monitoring | ✅ Active |
-| **Port Scan Detection** | Identifies reconnaissance attempts and systematic port probing | ✅ Active |
-| **IP Spoofing Detection** | TTL-based forgery detection and sequence validation | ✅ Active |
-| **User Behavior Analytics** | ML-based anomaly detection for unusual network patterns | ✅ Active |
-| **Audio Alert System** | Real-time sound notifications for different threat types | ✅ Active |
-| **Threat Visualization** | Color-coded live threat history with timestamps and severity | ✅ Active |
+| **DDoS Detection** | Real-time packet rate analysis and traffic volume monitoring | Active |
+| **Port Scan Detection** | Identifies reconnaissance attempts and systematic port probing | Active |
+| **IP Spoofing Detection** | TTL-based forgery detection and sequence validation | Active |
+| **User Behavior Analytics** | ML-based anomaly detection for unusual network patterns | Active |
+| **Audio Alert System** | Real-time sound notifications for different threat types | Active |
+| **Threat Visualization** | Color-coded live threat history with timestamps and severity | Active |
 
-### 🚀 Core Capabilities
+### Core Capabilities
 
 - **Live Dashboard** - Real-time statistics, protocol distribution, and threat monitoring
 - **Threat History** - Color-coded timeline showing last 10 threats with severity levels
@@ -58,7 +58,7 @@ SnifferX is an advanced network security monitoring tool that provides **real-ti
 - **Cross-Platform** - Native support for Windows, Linux, and macOS
 - **Packet Analysis** - Deep inspection of TCP, UDP, ICMP, and other protocols
 
-### 📊 Session Export & Reporting
+### Session Export & Reporting
 
 Every monitoring session is automatically exported when you stop:
 - **JSON format** - Complete session data, statistics, and threat details
@@ -73,13 +73,13 @@ Exported data includes:
 - Top talkers (source IPs)
 - Protocol distribution
 
-### ⚡ Recent Threat Activity View
+### Recent Threat Activity View
 
 The dashboard now shows a live threat history with:
-- 🔴 **Critical** - Immediate action required
-- 🟠 **High** - Serious threat detected
-- 🟡 **Medium** - Suspicious activity
-- 🟢 **Low** - Minor anomaly
+- **Critical** - Immediate action required
+- **High** - Serious threat detected
+- **Medium** - Suspicious activity
+- **Low** - Minor anomaly
 
 Each threat shows:
 - Timestamp of detection
@@ -191,14 +191,14 @@ When monitoring is active, you'll see a real-time dashboard:
                     LIVE MONITORING DASHBOARD
 ═══════════════════════════════════════════════════════════
 
-📊 System Status
+System Status
 ────────────────────────────────
   Total Packets:  12,543
   Packet Rate:    134.5 pps
   Uptime:         93s
-  Status:         ● ACTIVE
+  Status:         ACTIVE
 
-🚨 Threat Detection
+Threat Detection
 ───────────────────────────────────────────────────────────
   Total Alerts:   2
   DDoS Attacks:   1
@@ -206,7 +206,7 @@ When monitoring is active, you'll see a real-time dashboard:
   IP Spoofing:    0
   User Anomalies: 0
 
-📡 Protocol Distribution
+Protocol Distribution
 ───────────────────────────────────────────────────────────
   TCP      ████████████████████████ 65.3%
   UDP      ████████ 21.4%
@@ -283,7 +283,7 @@ SnifferX/
 
 ---
 
-## 🔊 Audio Alert System
+## Audio Alert System
 
 SnifferX features a **revolutionary audio alert system** - the first network monitor with real-time sound-based threat notifications.
 
@@ -307,7 +307,7 @@ SnifferX features a **revolutionary audio alert system** - the first network mon
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Category | Technologies |
 |----------|-------------|
@@ -323,7 +323,7 @@ SnifferX features a **revolutionary audio alert system** - the first network mon
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 ### Live Monitoring Dashboard
 ```
@@ -361,7 +361,7 @@ Coming soon - Audio alert system testing interface
 
 ## Legal Notice
 
-**⚠️ IMPORTANT - READ BEFORE USE**
+**IMPORTANT - READ BEFORE USE**
 
 This tool is designed for **EDUCATIONAL** and **AUTHORIZED SECURITY TESTING** purposes only.
 
@@ -375,7 +375,7 @@ By using this software, you agree to use it only for legal and ethical purposes.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions from the community! Whether it's bug fixes, new features, or documentation improvements.
 
@@ -422,7 +422,7 @@ For detailed documentation, visit the [docs](./docs) folder:
 
 ---
 
-## 📋 Roadmap
+## Roadmap
 
 - [ ] Web-based dashboard UI
 - [ ] Export reports in PDF format
@@ -434,13 +434,13 @@ For detailed documentation, visit the [docs](./docs) folder:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Vyom Khurana**
 
@@ -449,7 +449,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built with Node.js and love for cybersecurity
 - Inspired by industry-standard SIEM tools
@@ -459,7 +459,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 <div align="center">
 
-### ⭐ Star this repository if you find it helpful!
+### Star this repository if you find it helpful!
 
 **Made for cybersecurity education and research**
 
