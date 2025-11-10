@@ -745,24 +745,248 @@ program
         console.log(chalk.gray('  Issues: ') + chalk.cyan('https://github.com/Vyomkhurana/SnifferX/issues\n'));
     });
 
-// Show friendly welcome if no command
+// Show friendly welcome if no command - Interactive Mode
 if (process.argv.length === 2) {
+    const readline = require('readline');
+    
     displayBanner();
-    console.log(chalk.cyan.bold('Welcome to SnifferX!\n'));
+    console.log(chalk.cyan.bold('Welcome to SnifferX - Interactive Mode\n'));
     console.log(chalk.white('A professional network threat detection tool.\n'));
     
-    console.log(chalk.white.bold('QUICK START:\n'));
-    console.log(chalk.cyan('  snifferx start') + chalk.gray('           # Guided setup (recommended for beginners)'));
-    console.log(chalk.cyan('  snifferx auto') + chalk.gray('            # Auto-detect and start monitoring\n'));
+    console.log(chalk.white.bold('AVAILABLE COMMANDS:\n'));
+    console.log(chalk.cyan('  start') + chalk.gray('           # Guided setup (recommended for beginners)'));
+    console.log(chalk.cyan('  auto') + chalk.gray('            # Auto-detect and start monitoring'));
+    console.log(chalk.cyan('  interfaces') + chalk.gray('    # List available network interfaces'));
+    console.log(chalk.cyan('  config') + chalk.gray('         # Show detection configuration'));
+    console.log(chalk.cyan('  exports') + chalk.gray('        # View exported session history'));
+    console.log(chalk.cyan('  test-audio') + chalk.gray('     # Test audio alert system'));
+    console.log(chalk.cyan('  help') + chalk.gray('           # Show detailed help'));
+    console.log(chalk.cyan('  clear') + chalk.gray('          # Clear screen'));
+    console.log(chalk.cyan('  exit') + chalk.gray('           # Exit SnifferX\n'));
     
-    console.log(chalk.white.bold('COMMON COMMANDS:\n'));
-    console.log(chalk.cyan('  snifferx interfaces') + chalk.gray('    # List available network interfaces'));
-    console.log(chalk.cyan('  snifferx monitor -i 7') + chalk.gray('   # Start monitoring interface 7'));
-    console.log(chalk.cyan('  snifferx help') + chalk.gray('           # Show detailed help with examples\n'));
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        prompt: chalk.cyan('snifferx> ')
+    });
     
-    console.log(chalk.yellow('Tip: ') + chalk.white('Run ') + chalk.cyan('snifferx start') + chalk.white(' for a guided setup\n'));
-    process.exit(0);
+    rl.prompt();
+    
+    rl.on('line', async (line) => {
+        const input = line.trim();
+        
+        if (!input) {
+            rl.prompt();
+            return;
+        }
+        
+        const args = ['node', 'snifferx'].concat(input.split(' '));
+        
+        const command = input.split(' ')[0];
+        
+        // Handle exit commands
+        if (command === 'exit' || command === 'quit') {
+            console.log(chalk.yellow('\nExiting SnifferX. Stay secure!\n'));
+            rl.close();
+            process.exit(0);
+        }
+        
+        // Handle clear command
+        if (command === 'clear' || command === 'cls') {
+            displayBanner();
+            rl.prompt();
+            return;
+        }
+        
+        // Execute command
+        try {
+            // Save the original argv
+            const originalArgv = process.argv;
+            
+            // Set new argv for commander
+            process.argv = args;
+            
+            // Create new program instance for this command
+            const { Command } = require('commander');
+            const subProgram = new Command();
+            
+            subProgram
+                .name('snifferx')
+                .exitOverride() // Prevent process.exit()
+                .configureOutput({
+                    writeOut: (str) => process.stdout.write(str),
+                    writeErr: (str) => process.stderr.write(str)
+                });
+            
+            // Copy all commands from main program
+            subProgram
+                .command('start')
+                .description('Quick start with guided setup')
+                .action(async () => {
+                    rl.close();
+                    await quickStart();
+                });
+            
+            subProgram
+                .command('auto')
+                .description('Auto-detect interface and start monitoring')
+                .action(async () => {
+                    rl.close();
+                    await autoDetectAndStart();
+                });
+            
+            subProgram
+                .command('interfaces')
+                .description('List available network interfaces')
+                .action(async () => {
+                    await listInterfaces();
+                    console.log('');
+                    rl.prompt();
+                });
+            
+            subProgram
+                .command('config')
+                .description('Display detection configuration')
+                .action(() => {
+                    showConfig();
+                    rl.prompt();
+                });
+            
+            subProgram
+                .command('exports')
+                .alias('history')
+                .description('View exported session history')
+                .action(() => {
+                    // Inline exports display
+                    displayBanner();
+                    console.log(chalk.cyan.bold('Exported Session History\n'));
+                    
+                    const fs = require('fs');
+                    const path = require('path');
+                    const exportDir = path.join(__dirname, 'exports');
+                    
+                    try {
+                        if (!fs.existsSync(exportDir)) {
+                            console.log(chalk.yellow('No exported sessions found.\n'));
+                            console.log(chalk.gray('Sessions are automatically exported when you stop monitoring.\n'));
+                            rl.prompt();
+                            return;
+                        }
+                        
+                        const files = fs.readdirSync(exportDir)
+                            .filter(f => f.endsWith('.json'))
+                            .sort()
+                            .reverse();
+                        
+                        if (files.length === 0) {
+                            console.log(chalk.yellow('No exported sessions found.\n'));
+                            rl.prompt();
+                            return;
+                        }
+                        
+                        console.log(chalk.gray('─'.repeat(70)));
+                        files.slice(0, 10).forEach((file, index) => {
+                            const filePath = path.join(exportDir, file);
+                            const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                            const stats = fs.statSync(filePath);
+                            
+                            console.log(chalk.cyan(`\n${index + 1}. ${file}`));
+                            console.log(chalk.gray('   Date: ') + chalk.white(new Date(data.session.startTime).toLocaleString()));
+                            console.log(chalk.gray('   Duration: ') + chalk.white(data.session.duration));
+                            console.log(chalk.gray('   Packets: ') + chalk.white(data.statistics.totalPackets.toLocaleString()));
+                            console.log(chalk.gray('   Threats: ') + (data.statistics.totalAlerts > 0 ? chalk.red(data.statistics.totalAlerts) : chalk.green('0')));
+                            console.log(chalk.gray('   Size: ') + chalk.white((stats.size / 1024).toFixed(2) + ' KB'));
+                        });
+                        console.log(chalk.gray('\n─'.repeat(70)));
+                        console.log(chalk.gray(`\nShowing ${Math.min(files.length, 10)} of ${files.length} sessions`));
+                        console.log(chalk.gray('Location: ') + chalk.cyan(exportDir) + '\n');
+                        
+                    } catch (error) {
+                        console.log(chalk.red('[!] Error reading exports: ' + error.message + '\n'));
+                    }
+                    rl.prompt();
+                });
+            
+            subProgram
+                .command('test-audio')
+                .description('Test audio alert system')
+                .action(() => {
+                    displayBanner();
+                    console.log(chalk.cyan.bold('Audio Alert System Test\n'));
+                    
+                    const audioSystem = new AudioAlertSystem(config);
+                    
+                    console.log(chalk.yellow('Testing all audio patterns...\n'));
+                    
+                    console.log(chalk.white('1. Startup Sound (Musical Chord)'));
+                    audioSystem.playStartupSound();
+                    
+                    setTimeout(() => {
+                        console.log(chalk.white('\n2. DDoS Alert (Rapid Beeps - High Severity)'));
+                        audioSystem.playAlert('ddos', 'high');
+                    }, 2000);
+                    
+                    setTimeout(() => {
+                        console.log(chalk.white('\n3. Port Scan Alert (Medium Beeps - Medium Severity)'));
+                        audioSystem.playAlert('port_scan', 'medium');
+                    }, 5000);
+                    
+                    setTimeout(() => {
+                        console.log(chalk.white('\n4. IP Spoofing Alert (Warbling Pattern - High Severity)'));
+                        audioSystem.playAlert('ip_spoofing', 'high');
+                    }, 8000);
+                    
+                    setTimeout(() => {
+                        console.log(chalk.white('\n5. User Behavior Alert (Soft Beeps - Low Severity)'));
+                        audioSystem.playAlert('user_behavior', 'low');
+                    }, 11000);
+                    
+                    setTimeout(() => {
+                        console.log(chalk.white('\n6. Emergency Alarm (Siren Pattern - Multiple Threats)'));
+                        audioSystem.playEmergencyAlarm();
+                    }, 14000);
+                    
+                    setTimeout(() => {
+                        console.log(chalk.white('\n7. Shutdown Sound (Descending Melody)'));
+                        audioSystem.playShutdownSound();
+                        
+                        console.log(chalk.green.bold('\n[+] Audio test complete!\n'));
+                        console.log(chalk.gray('If you heard all the sounds, the audio system is working correctly.'));
+                        console.log(chalk.gray('Note: Some systems may not support audio beeps.\n'));
+                        rl.prompt();
+                    }, 17000);
+                });
+            
+            subProgram
+                .command('help')
+                .description('Show help')
+                .action(() => {
+                    showHelp();
+                    rl.prompt();
+                });
+            
+            await subProgram.parseAsync(args);
+            
+            // Restore original argv
+            process.argv = originalArgv;
+            
+        } catch (error) {
+            if (error.code === 'commander.unknownCommand') {
+                console.log(chalk.red(`\n[!] Unknown command: ${command}`));
+                console.log(chalk.white('Type ') + chalk.cyan('help') + chalk.white(' to see available commands\n'));
+            } else if (error.code !== 'commander.help' && error.code !== 'commander.helpDisplayed') {
+                console.log(chalk.red('\n[!] Error: ' + error.message + '\n'));
+            }
+            rl.prompt();
+        }
+    });
+    
+    rl.on('close', () => {
+        console.log(chalk.yellow('\nExiting SnifferX. Stay secure!\n'));
+        process.exit(0);
+    });
+    
+} else {
+    // Parse arguments normally when commands are provided
+    program.parse(process.argv);
 }
-
-// Parse arguments
-program.parse(process.argv);
