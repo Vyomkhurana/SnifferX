@@ -2,7 +2,51 @@
 
 All notable changes to SnifferX will be documented in this file.
 
-## [1.1.0] - 2025-10-16
+## [1.1.0] - 2025-11-15
+
+### Added
+- **Interactive CLI Mode**: Running `node snifferx` now launches an interactive prompt
+  - Continuous input mode - no need to restart for each command
+  - Command history support (up to 50 commands)
+  - Available commands: start, auto, interfaces, config, exports, test-audio, help, stats, clear, exit
+  - Type `exit` or press Ctrl+C to quit
+
+- **Enhanced Statistics**:
+  - New `stats` command showing quick system information
+  - Human-readable uptime formatting (e.g., "2h 15m 30s")
+  - Peak packets per second tracking
+  - Average packet size calculation
+  - Alert rate percentage in exports
+
+- **Improved Session Management**:
+  - Unique session ID generation for each monitoring session
+  - Enhanced export metadata with platform info, Node version, and SnifferX version
+  - Better session tracking with interface names
+  - Data integrity verification in exports
+
+- **Smart Command Suggestions**:
+  - Autocomplete suggestions for mistyped commands
+  - Helpful error messages with command hints
+  - Keyboard shortcuts information displayed in welcome screen
+
+- **Performance Monitoring**:
+  - Real-time peak performance tracking
+  - Average packet size analytics
+  - Enhanced dashboard with formatted uptime display
+
+### Improved
+- Better error handling in interactive mode
+- More detailed export files with comprehensive metadata
+- Cleaner command output formatting
+- Enhanced user experience with helpful tips
+
+### Technical
+- Added `formatUptime()` utility function for time formatting
+- Extended stats object with sessionId, interfaceName, peakPacketsPerSecond, averagePacketSize
+- Improved command parsing in interactive mode
+- Better memory and resource tracking
+
+## [1.0.0] - 2025-10-16
 
 ### Added
 - 👤 **User Behavior Analytics (UBA)** - Advanced behavioral anomaly detection

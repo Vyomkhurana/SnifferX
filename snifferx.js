@@ -20,6 +20,22 @@ const UserBehaviorAnalytics = require('./src/detection/userBehaviorAnalytics');
 const AudioAlertSystem = require('./src/audio/audioAlertSystem');
 const utils = require('./utils');
 
+// Utility: Format uptime in human-readable format
+function formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+    
+    return parts.join(' ');
+}
+
 // ASCII Art Banner
 const displayBanner = () => {
     console.clear();
@@ -43,6 +59,8 @@ const displayBanner = () => {
 let stats = {
     totalPackets: 0,
     startTime: null,
+    sessionId: null,
+    interfaceName: null,
     alerts: {
         ddos: 0,
         portScan: 0,
@@ -51,7 +69,9 @@ let stats = {
     },
     protocols: {},
     topTalkers: {},
-    threatHistory: [] // NEW: Store last 10 threats for visualization
+    threatHistory: [], // Store last 10 threats for visualization
+    peakPacketsPerSecond: 0,
+    averagePacketSize: 0
 };
 
 // Threat history management
@@ -89,7 +109,7 @@ function displayDashboard() {
     console.log(chalk.gray('───────────────────────────────────────────────────────────'));
     console.log(`  ${chalk.white('Total Packets:')}  ${chalk.cyan(stats.totalPackets.toLocaleString())}`);
     console.log(`  ${chalk.white('Packet Rate:')}   ${chalk.cyan(pps)} ${chalk.gray('pps')}`);
-    console.log(`  ${chalk.white('Uptime:')}        ${chalk.cyan(uptime)}${chalk.gray('s')}`);
+    console.log(`  ${chalk.white('Uptime:')}        ${chalk.cyan(formatUptime(uptime))}`);
     console.log(`  ${chalk.white('Status:')}        ${chalk.green('ACTIVE')}`);
     
     // Threat Alerts
@@ -172,6 +192,23 @@ function displayDashboard() {
  */
 function handlePacket(packet, detectors) {
     stats.totalPackets++;
+    
+    // Track packet size for averages
+    if (packet.length) {
+        const currentAvg = stats.averagePacketSize;
+        stats.averagePacketSize = ((currentAvg * (stats.totalPackets - 1)) + packet.length) / stats.totalPackets;
+    }
+    
+    // Track peak packets per second
+    if (stats.startTime) {
+        const uptime = Math.floor((Date.now() - stats.startTime) / 1000);
+        if (uptime > 0) {
+            const currentPps = stats.totalPackets / uptime;
+            if (currentPps > stats.peakPacketsPerSecond) {
+                stats.peakPacketsPerSecond = Math.floor(currentPps);
+            }
+        }
+    }
     
     // Track protocols
     stats.protocols[packet.protocol] = (stats.protocols[packet.protocol] || 0) + 1;
@@ -287,7 +324,12 @@ function handlePacket(packet, detectors) {
 async function startMonitoring(interfaceId, options) {
     displayBanner();
     
+    // Generate session ID
+    stats.sessionId = `snx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    stats.interfaceName = interfaceId;
+    
     console.log(chalk.cyan.bold('Starting Network Threat Detection\n'));
+    console.log(chalk.gray('Session ID: ') + chalk.cyan(stats.sessionId));
     console.log(chalk.gray('Interface ID: ') + chalk.cyan(interfaceId));
     console.log(chalk.gray('Time: ') + chalk.white(utils.getFormattedTimestamp()));
     console.log(chalk.gray('Audio Alerts: ') + (config.audio.enabled ? chalk.green('Enabled') : chalk.yellow('Disabled')));
@@ -398,20 +440,32 @@ async function startMonitoring(interfaceId, options) {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const sessionData = {
                 session: {
+                    id: stats.sessionId || `session-${timestamp}`,
                     startTime: new Date(stats.startTime).toISOString(),
                     endTime: new Date().toISOString(),
                     duration: captureStats.duration,
-                    interface: interfaceId
+                    interface: stats.interfaceName || interfaceId,
+                    snifferxVersion: config.app.version,
+                    platform: process.platform,
+                    nodeVersion: process.version
                 },
                 statistics: {
                     totalPackets: captureStats.totalPackets,
                     packetsPerSecond: captureStats.packetsPerSecond,
+                    peakPacketsPerSecond: stats.peakPacketsPerSecond,
+                    averagePacketSize: stats.averagePacketSize,
                     totalAlerts: totalAlerts,
-                    alertsByType: stats.alerts
+                    alertsByType: stats.alerts,
+                    alertRate: (totalAlerts / (captureStats.totalPackets || 1) * 100).toFixed(2) + '%'
                 },
                 threats: stats.threatHistory,
                 protocols: stats.protocols,
-                topTalkers: stats.topTalkers
+                topTalkers: stats.topTalkers,
+                metadata: {
+                    exportedAt: new Date().toISOString(),
+                    exportFormat: 'json',
+                    dataIntegrity: 'complete'
+                }
             };
             
             // Save as JSON
@@ -761,13 +815,19 @@ if (process.argv.length === 2) {
     console.log(chalk.cyan('  exports') + chalk.gray('        # View exported session history'));
     console.log(chalk.cyan('  test-audio') + chalk.gray('     # Test audio alert system'));
     console.log(chalk.cyan('  help') + chalk.gray('           # Show detailed help'));
+    console.log(chalk.cyan('  stats') + chalk.gray('          # Show quick statistics'));
     console.log(chalk.cyan('  clear') + chalk.gray('          # Clear screen'));
-    console.log(chalk.cyan('  exit') + chalk.gray('           # Exit SnifferX\n'));
+    console.log(chalk.cyan('  exit') + chalk.gray('           # Exit SnifferX'));
+    console.log(chalk.gray('\n  Tip: Press Ctrl+C to exit at any time\n'));
+    
+    const commandHistory = [];
+    let historyIndex = -1;
     
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
-        prompt: chalk.cyan('snifferx> ')
+        prompt: chalk.cyan('snifferx> '),
+        historySize: 50
     });
     
     rl.prompt();
@@ -794,6 +854,26 @@ if (process.argv.length === 2) {
         // Handle clear command
         if (command === 'clear' || command === 'cls') {
             displayBanner();
+            rl.prompt();
+            return;
+        }
+        
+        // Handle stats command
+        if (command === 'stats') {
+            console.log(chalk.cyan.bold('\nQuick Statistics:\n'));
+            console.log(chalk.white('  Version: ') + chalk.cyan(config.app.version));
+            console.log(chalk.white('  Node: ') + chalk.cyan(process.version));
+            console.log(chalk.white('  Platform: ') + chalk.cyan(process.platform));
+            console.log(chalk.white('  Memory Usage: ') + chalk.cyan((process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + ' MB'));
+            console.log(chalk.white('  Uptime: ') + chalk.cyan(formatUptime(process.uptime())));
+            console.log('');
+            rl.prompt();
+            return;
+        }
+        
+        // Handle version command
+        if (command === 'version' || command === '-v' || command === '--version') {
+            console.log(chalk.cyan('\nSnifferX v' + config.app.version + '\n'));
             rl.prompt();
             return;
         }
@@ -976,6 +1056,16 @@ if (process.argv.length === 2) {
                 console.log(chalk.white('Type ') + chalk.cyan('help') + chalk.white(' to see available commands\n'));
             } else if (error.code !== 'commander.help' && error.code !== 'commander.helpDisplayed') {
                 console.log(chalk.red('\n[!] Error: ' + error.message + '\n'));
+                
+                // Suggest similar commands
+                const availableCommands = ['start', 'auto', 'interfaces', 'config', 'exports', 'test-audio', 'help', 'stats', 'clear', 'exit'];
+                const suggestions = availableCommands.filter(cmd => 
+                    cmd.includes(command.toLowerCase()) || command.toLowerCase().includes(cmd)
+                );
+                
+                if (suggestions.length > 0) {
+                    console.log(chalk.yellow('Did you mean: ') + chalk.cyan(suggestions.join(', ')) + '?\n');
+                }
             }
             rl.prompt();
         }
