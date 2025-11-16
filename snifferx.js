@@ -36,10 +36,10 @@ function formatUptime(seconds) {
     return parts.join(' ');
 }
 
-// ASCII Art Banner
+// Enhanced ASCII Art Banner with gradient effect
 const displayBanner = () => {
     console.clear();
-    console.log(chalk.cyan(`
+    console.log(chalk.cyan.bold(`
     ███████╗███╗   ██╗██╗███████╗███████╗███████╗██████╗ ██╗  ██╗
     ██╔════╝████╗  ██║██║██╔════╝██╔════╝██╔════╝██╔══██╗╚██╗██╔╝
     ███████╗██╔██╗ ██║██║█████╗  █████╗  █████╗  ██████╔╝ ╚███╔╝ 
@@ -47,12 +47,13 @@ const displayBanner = () => {
     ███████║██║ ╚████║██║██║     ██║     ███████╗██║  ██║██╔╝ ██╗
     ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
     `));
-    console.log(chalk.gray('    ═══════════════════════════════════════════════════════════'));
-    console.log(chalk.white(`           Network Threat Detection & Analysis v${config.app.version}`));
-    console.log(chalk.gray('    ═══════════════════════════════════════════════════════════'));
-    console.log(chalk.gray(`    Author: ${config.app.author}`));
-    console.log(chalk.gray(`    GitHub: ${config.app.github}`));
-    console.log(chalk.gray('    ═══════════════════════════════════════════════════════════\n'));
+    console.log(chalk.gray('    ╔═══════════════════════════════════════════════════════════╗'));
+    console.log(chalk.white.bold(`    ║     Network Threat Detection & Analysis ${chalk.cyan('v' + config.app.version)}      ║`));
+    console.log(chalk.gray('    ╠═══════════════════════════════════════════════════════════╣'));
+    console.log(chalk.gray(`    ║  ${chalk.white('Author:')} ${chalk.cyan(config.app.author.padEnd(47))} ║`));
+    console.log(chalk.gray(`    ║  ${chalk.white('GitHub:')} ${chalk.cyan(config.app.github.padEnd(47))} ║`));
+    console.log(chalk.gray(`    ║  ${chalk.white('Platform:')} ${chalk.green(process.platform.toUpperCase().padEnd(45))} ║`));
+    console.log(chalk.gray('    ╚═══════════════════════════════════════════════════════════╝\n'));
 };
 
 // Statistics tracking
@@ -100,27 +101,28 @@ function displayDashboard() {
     const pps = uptime > 0 ? (stats.totalPackets / uptime).toFixed(2) : 0;
     
     // Clear previous stats (keep banner visible)
-    console.log('\n' + chalk.bold.cyan('═══════════════════════════════════════════════════════════'));
-    console.log(chalk.bold.cyan('                    LIVE MONITORING DASHBOARD'));
-    console.log(chalk.bold.cyan('═══════════════════════════════════════════════════════════\n'));
+    console.log('\n' + chalk.bold.cyan('╔═══════════════════════════════════════════════════════════╗'));
+    console.log(chalk.bold.cyan('║              LIVE MONITORING DASHBOARD                    ║'));
+    console.log(chalk.bold.cyan('╚═══════════════════════════════════════════════════════════╝\n'));
     
-    // System Status
-    console.log(chalk.bold.green('System Status'));
+    // System Status with enhanced visuals
+    console.log(chalk.bgGreen.black.bold(' SYSTEM STATUS ') + chalk.green(' ▼'));
     console.log(chalk.gray('───────────────────────────────────────────────────────────'));
-    console.log(`  ${chalk.white('Total Packets:')}  ${chalk.cyan(stats.totalPackets.toLocaleString())}`);
-    console.log(`  ${chalk.white('Packet Rate:')}   ${chalk.cyan(pps)} ${chalk.gray('pps')}`);
-    console.log(`  ${chalk.white('Uptime:')}        ${chalk.cyan(formatUptime(uptime))}`);
-    console.log(`  ${chalk.white('Status:')}        ${chalk.green('ACTIVE')}`);
+    console.log(`  ${chalk.white.bold('Total Packets:')}  ${chalk.cyan.bold(stats.totalPackets.toLocaleString())}`);
+    console.log(`  ${chalk.white.bold('Packet Rate:')}   ${chalk.cyan.bold(pps)} ${chalk.gray('packets/sec')}`);
+    console.log(`  ${chalk.white.bold('Uptime:')}        ${chalk.cyan.bold(formatUptime(uptime))}`);
+    console.log(`  ${chalk.white.bold('Status:')}        ${chalk.green.bold('● ACTIVE')}`);
     
-    // Threat Alerts
+    // Threat Alerts with severity indicators
     const totalAlerts = stats.alerts.ddos + stats.alerts.portScan + stats.alerts.ipSpoofing + stats.alerts.userBehavior;
-    console.log(chalk.bold.red('\nThreat Detection'));
+    const statusColor = totalAlerts === 0 ? chalk.bgGreen : totalAlerts < 5 ? chalk.bgYellow : chalk.bgRed;
+    console.log('\n' + statusColor.black.bold(' THREAT DETECTION ') + (totalAlerts === 0 ? chalk.green(' ▼') : chalk.red(' ▼')));
     console.log(chalk.gray('───────────────────────────────────────────────────────────'));
-    console.log(`  ${chalk.white('Total Alerts:')}   ${totalAlerts > 0 ? chalk.red(totalAlerts) : chalk.green('0')}`);
-    console.log(`  ${chalk.white('DDoS Attacks:')}   ${stats.alerts.ddos > 0 ? chalk.red(stats.alerts.ddos) : chalk.gray('0')}`);
-    console.log(`  ${chalk.white('Port Scans:')}     ${stats.alerts.portScan > 0 ? chalk.red(stats.alerts.portScan) : chalk.gray('0')}`);
-    console.log(`  ${chalk.white('IP Spoofing:')}    ${stats.alerts.ipSpoofing > 0 ? chalk.red(stats.alerts.ipSpoofing) : chalk.gray('0')}`);
-    console.log(`  ${chalk.white('User Anomalies:')} ${stats.alerts.userBehavior > 0 ? chalk.red(stats.alerts.userBehavior) : chalk.gray('0')}`);
+    console.log(`  ${chalk.white.bold('Total Alerts:')}   ${totalAlerts > 0 ? chalk.red.bold(totalAlerts) : chalk.green.bold('0 - All Clear')}`);
+    console.log(`  ${chalk.white.bold('DDoS Attacks:')}   ${stats.alerts.ddos > 0 ? chalk.red.bold('● ' + stats.alerts.ddos) : chalk.gray('○ 0')}`);
+    console.log(`  ${chalk.white.bold('Port Scans:')}     ${stats.alerts.portScan > 0 ? chalk.red.bold('● ' + stats.alerts.portScan) : chalk.gray('○ 0')}`);
+    console.log(`  ${chalk.white.bold('IP Spoofing:')}    ${stats.alerts.ipSpoofing > 0 ? chalk.red.bold('● ' + stats.alerts.ipSpoofing) : chalk.gray('○ 0')}`);
+    console.log(`  ${chalk.white.bold('User Anomalies:')} ${stats.alerts.userBehavior > 0 ? chalk.red.bold('● ' + stats.alerts.userBehavior) : chalk.gray('○ 0')}`);
     
     // Protocol Distribution
     const protocols = Object.entries(stats.protocols)
@@ -128,25 +130,27 @@ function displayDashboard() {
         .slice(0, 5);
     
     if (protocols.length > 0) {
-        console.log(chalk.bold.blue('\nProtocol Distribution'));
+        console.log('\n' + chalk.bgBlue.black.bold(' PROTOCOL DISTRIBUTION ') + chalk.blue(' ▼'));
         console.log(chalk.gray('───────────────────────────────────────────────────────────'));
         protocols.forEach(([proto, count]) => {
             const percentage = ((count / stats.totalPackets) * 100).toFixed(1);
-            const bar = '█'.repeat(Math.floor(percentage / 2));
-            console.log(`  ${chalk.white(proto.padEnd(8))} ${chalk.cyan(bar)} ${chalk.gray(percentage + '%')}`);
+            const barLength = Math.floor(percentage / 2);
+            const bar = '█'.repeat(barLength) + '░'.repeat(25 - barLength);
+            console.log(`  ${chalk.white.bold(proto.padEnd(8))} ${chalk.cyan(bar)} ${chalk.yellow(percentage + '%')}`);
         });
     }
     
-    // Top Talkers
+    // Top Talkers with enhanced display
     const talkers = Object.entries(stats.topTalkers)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
     
     if (talkers.length > 0) {
-        console.log(chalk.bold.magenta('\nTop Source IPs'));
+        console.log('\n' + chalk.bgMagenta.black.bold(' TOP SOURCE IPs ') + chalk.magenta(' ▼'));
         console.log(chalk.gray('───────────────────────────────────────────────────────────'));
         talkers.forEach(([ip, count], index) => {
-            console.log(`  ${chalk.gray(`${index + 1}.`)} ${chalk.cyan(ip.padEnd(15))} ${chalk.gray('→')} ${chalk.white(count)} ${chalk.gray('packets')}`);
+            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ' ';
+            console.log(`  ${chalk.yellow.bold(`#${index + 1}`)} ${chalk.cyan.bold(ip.padEnd(15))} ${chalk.gray('→')} ${chalk.white.bold(count.toLocaleString())} ${chalk.gray('packets')}`);
         });
     }
     
@@ -183,8 +187,9 @@ function displayDashboard() {
         });
     }
     
-    console.log(chalk.gray('\n───────────────────────────────────────────────────────────'));
-    console.log(chalk.gray('Press Ctrl+C to stop monitoring\n'));
+    console.log(chalk.gray('\n╔═══════════════════════════════════════════════════════════╗'));
+    console.log(chalk.gray('║ ') + chalk.yellow.bold('Press Ctrl+C to stop monitoring') + chalk.gray('                        ║'));
+    console.log(chalk.gray('╚═══════════════════════════════════════════════════════════╝\n'));
 }
 
 /**
@@ -804,21 +809,25 @@ if (process.argv.length === 2) {
     const readline = require('readline');
     
     displayBanner();
-    console.log(chalk.cyan.bold('Welcome to SnifferX - Interactive Mode\n'));
-    console.log(chalk.white('A professional network threat detection tool.\n'));
+    console.log(chalk.cyan.bold('╔════════════════════════════════════════════════════════════════╗'));
+    console.log(chalk.cyan.bold('║           Welcome to Interactive Mode - v' + config.app.version + '               ║'));
+    console.log(chalk.cyan.bold('╚════════════════════════════════════════════════════════════════╝\n'));
+    console.log(chalk.white('  Real-time network threat detection with audio alerts and analytics\n'));
     
-    console.log(chalk.white.bold('AVAILABLE COMMANDS:\n'));
-    console.log(chalk.cyan('  start') + chalk.gray('           # Guided setup (recommended for beginners)'));
-    console.log(chalk.cyan('  auto') + chalk.gray('            # Auto-detect and start monitoring'));
-    console.log(chalk.cyan('  interfaces') + chalk.gray('    # List available network interfaces'));
-    console.log(chalk.cyan('  config') + chalk.gray('         # Show detection configuration'));
-    console.log(chalk.cyan('  exports') + chalk.gray('        # View exported session history'));
-    console.log(chalk.cyan('  test-audio') + chalk.gray('     # Test audio alert system'));
-    console.log(chalk.cyan('  help') + chalk.gray('           # Show detailed help'));
-    console.log(chalk.cyan('  stats') + chalk.gray('          # Show quick statistics'));
-    console.log(chalk.cyan('  clear') + chalk.gray('          # Clear screen'));
-    console.log(chalk.cyan('  exit') + chalk.gray('           # Exit SnifferX'));
-    console.log(chalk.gray('\n  Tip: Press Ctrl+C to exit at any time\n'));
+    console.log(chalk.yellow.bold('  QUICK START:\n'));
+    console.log(chalk.green('    start') + chalk.gray('     → Guided setup wizard (easiest way to begin)'));
+    console.log(chalk.green('    auto') + chalk.gray('      → Auto-detect interface and start immediately\n'));
+    
+    console.log(chalk.white.bold('  ALL COMMANDS:\n'));
+    console.log(chalk.cyan('    interfaces') + chalk.gray('  → List all network interfaces'));
+    console.log(chalk.cyan('    config') + chalk.gray('      → Show detection configuration'));
+    console.log(chalk.cyan('    exports') + chalk.gray('     → View session history and reports'));
+    console.log(chalk.cyan('    test-audio') + chalk.gray('  → Test audio alert system'));
+    console.log(chalk.cyan('    stats') + chalk.gray('       → Show system statistics'));
+    console.log(chalk.cyan('    help') + chalk.gray('        → Detailed help with examples'));
+    console.log(chalk.cyan('    clear') + chalk.gray('       → Clear screen'));
+    console.log(chalk.cyan('    exit') + chalk.gray('        → Exit SnifferX'));
+    console.log(chalk.gray('\n  Tips: Use Up/Down arrows for command history | Press Ctrl+C to exit\n'));
     
     const commandHistory = [];
     let historyIndex = -1;

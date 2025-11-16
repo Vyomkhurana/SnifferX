@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)]()
-[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/Vyomkhurana/SnifferX)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://github.com/Vyomkhurana/SnifferX)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Vyomkhurana/SnifferX/pulls)
 [![Stars](https://img.shields.io/github/stars/Vyomkhurana/SnifferX?style=social)](https://github.com/Vyomkhurana/SnifferX/stargazers)
 
@@ -16,6 +16,18 @@
 [Features](#features) • [Installation](#installation) • [Quick Start](#usage) • [Documentation](#documentation) • [Contributing](#contributing)
 
 </div>
+
+---
+
+## 🆕 What's New in v1.1.0
+
+**Interactive CLI Mode** - Just run `node snifferx.js` and start typing commands! No need to restart between commands.  
+**Enhanced Dashboard** - Beautiful color-coded interface with progress bars and visual indicators  
+**Smart Suggestions** - Get autocomplete hints when you mistype commands  
+**Session Tracking** - Unique session IDs and enhanced export metadata  
+**Quick Stats** - New `stats` command for instant system information  
+
+[View Full Changelog](CHANGELOG.md)
 
 ---
 
@@ -153,19 +165,48 @@ npm install
 
 ## Usage
 
-### Quick Start (Beginner-Friendly)
+### Quick Start - 3 Easy Steps!
+
+**Step 1:** Launch SnifferX Interactive Mode
+```bash
+node snifferx.js
+```
+
+**Step 2:** The interactive prompt appears - just type commands!
+```bash
+snifferx> start        # Guided setup (easiest)
+snifferx> auto         # Auto-detect interface
+snifferx> interfaces   # List available interfaces
+snifferx> help         # Get help
+snifferx> exit         # Exit when done
+```
+
+**Step 3:** That's it! SnifferX will guide you through the rest.
+
+### Alternative - Direct Commands
+
+You can also run commands directly:
 
 ```bash
-# Option 1: Guided Setup Wizard (Recommended for first-time users)
+# Guided Setup (Recommended for first-time users)
 node snifferx.js start
 
-# Option 2: Auto-detect your network interface and start
+# Auto-detect and start immediately
 node snifferx.js auto
 
-# Option 3: Manual setup
+# Manual interface selection
 node snifferx.js interfaces        # List interfaces
 node snifferx.js monitor -i 7      # Start monitoring interface 7
 ```
+
+### Interactive Mode (NEW in v1.1.0!)
+
+Run `node snifferx.js` to enter interactive mode where you can:
+- Type commands directly without restarting
+- Access command history (press Up/Down arrows)
+- Get autocomplete suggestions for typos
+- See quick stats with the `stats` command
+- Clear screen anytime with `clear`
 
 ### Command Reference
 
@@ -179,6 +220,8 @@ node snifferx.js monitor -i 7      # Start monitoring interface 7
 | `config` | `settings` | Display detection configuration | `node snifferx.js config` |
 | `exports` | `history` | View exported session reports | `node snifferx.js exports` |
 | `test-audio` | `audio-test` | Test audio alert system | `node snifferx.js test-audio` |
+| `stats` | - | Show quick statistics | In interactive mode: `stats` |
+| `clear` | `cls` | Clear screen | In interactive mode: `clear` |
 | `help` | - | Detailed help with examples | `node snifferx.js help` |
 | `--version` | `-V` | Show version | `node snifferx.js --version` |
 
