@@ -11,6 +11,9 @@
 
 const chalk = require('chalk');
 const { Command } = require('commander');
+const fs = require('fs');
+const path = require('path');
+const { spawnSync } = require('child_process');
 const config = require('./config');
 const CaptureManager = require('./src/capture/captureManager');
 const DDoSDetector = require('./src/detection/ddosDetector');
@@ -39,21 +42,35 @@ function formatUptime(seconds) {
 // Enhanced ASCII Art Banner with gradient effect
 const displayBanner = () => {
     console.clear();
-    console.log(chalk.cyan.bold(`
-    ███████╗███╗   ██╗██╗███████╗███████╗███████╗██████╗ ██╗  ██╗
-    ██╔════╝████╗  ██║██║██╔════╝██╔════╝██╔════╝██╔══██╗╚██╗██╔╝
-    ███████╗██╔██╗ ██║██║█████╗  █████╗  █████╗  ██████╔╝ ╚███╔╝ 
-    ╚════██║██║╚██╗██║██║██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗ ██╔██╗ 
-    ███████║██║ ╚████║██║██║     ██║     ███████╗██║  ██║██╔╝ ██╗
-    ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
-    `));
-    console.log(chalk.gray('    ╔═══════════════════════════════════════════════════════════╗'));
-    console.log(chalk.white.bold(`    ║     Network Threat Detection & Analysis ${chalk.cyan('v' + config.app.version)}      ║`));
-    console.log(chalk.gray('    ╠═══════════════════════════════════════════════════════════╣'));
-    console.log(chalk.gray(`    ║  ${chalk.white('Author:')} ${chalk.cyan(config.app.author.padEnd(47))} ║`));
-    console.log(chalk.gray(`    ║  ${chalk.white('GitHub:')} ${chalk.cyan(config.app.github.padEnd(47))} ║`));
-    console.log(chalk.gray(`    ║  ${chalk.white('Platform:')} ${chalk.green(process.platform.toUpperCase().padEnd(45))} ║`));
-    console.log(chalk.gray('    ╚═══════════════════════════════════════════════════════════╝\n'));
+    const bannerLines = [
+        '    ███████╗███╗   ██╗██╗███████╗███████╗███████╗██████╗ ██╗  ██╗',
+        '    ██╔════╝████╗  ██║██║██╔════╝██╔════╝██╔════╝██╔══██╗╚██╗██╔╝',
+        '    ███████╗██╔██╗ ██║██║█████╗  █████╗  █████╗  ██████╔╝ ╚███╔╝ ',
+        '    ╚════██║██║╚██╗██║██║██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗ ██╔██╗ ',
+        '    ███████║██║ ╚████║██║██║     ██║     ███████╗██║  ██║██╔╝ ██╗',
+        '    ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝'
+    ];
+    const gradient = ['#6dd5ed', '#2193b0', '#0f7fd6', '#155799'];
+    bannerLines.forEach((line, idx) => {
+        const color = chalk.hex(gradient[idx % gradient.length]);
+        console.log(color.bold(line));
+    });
+    console.log(chalk.gray('    ╔' + '═'.repeat(63) + '╗'));
+    console.log(chalk.white.bold(`    ║  Network Threat Detection & Analysis ${chalk.cyan('v' + config.app.version.padEnd(4))}           ║`));
+    console.log(chalk.gray('    ╠' + '═'.repeat(63) + '╣'));
+    const metaRows = [
+        { label: 'Author', value: config.app.author },
+        { label: 'GitHub', value: config.app.github },
+        { label: 'Platform', value: process.platform.toUpperCase() },
+        { label: 'Interactive', value: 'node snifferx.js' }
+    ];
+    metaRows.forEach(row => {
+        const label = chalk.white(row.label + ':').padEnd(14);
+        const value = chalk.cyan(row.value.padEnd(44));
+        console.log(chalk.gray(`    ║  ${label} ${value} ║`));
+    });
+    console.log(chalk.gray('    ╚' + '═'.repeat(63) + '╝'));
+    console.log(chalk.gray('       Tip: Run "stats" anytime in interactive mode for quick health info\n'));
 };
 
 // Statistics tracking
@@ -190,6 +207,85 @@ function displayDashboard() {
     console.log(chalk.gray('\n╔═══════════════════════════════════════════════════════════╗'));
     console.log(chalk.gray('║ ') + chalk.yellow.bold('Press Ctrl+C to stop monitoring') + chalk.gray('                        ║'));
     console.log(chalk.gray('╚═══════════════════════════════════════════════════════════╝\n'));
+}
+
+/**
+ * Environment diagnostics (doctor) command
+ */
+async function runDiagnostics() {
+    displayBanner();
+    console.log(chalk.cyan.bold('SnifferX Diagnostics\n'));
+    console.log(chalk.white('Checking your environment to ensure SnifferX can capture packets reliably.\n'));
+
+    const results = [];
+    const record = (label, status, message) => results.push({ label, status, message });
+
+    // Node.js version check
+    const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
+    record('Node.js Version', nodeMajor >= 18 ? 'pass' : 'warn', `Detected ${process.version}, recommended >= 18.x`);
+
+    // Privilege check
+    if (process.platform === 'win32') {
+        record('Administrator Rights', 'warn', 'Run PowerShell as Administrator for full packet capture access');
+    } else {
+        const isRoot = typeof process.getuid === 'function' && process.getuid() === 0;
+        record('Root Privileges', isRoot ? 'pass' : 'warn', isRoot ? 'Running as root user' : 'Use sudo for reliable capture access');
+    }
+
+    // TShark availability
+    const tsharkResult = spawnSync('tshark', ['-v'], { shell: true, encoding: 'utf8' });
+    const tsharkAvailable = tsharkResult.status === 0;
+    record(
+        'TShark Installation',
+        tsharkAvailable ? 'pass' : 'fail',
+        tsharkAvailable
+            ? (tsharkResult.stdout.split('\n')[0] || tsharkResult.stderr.split('\n')[0] || 'tshark detected in PATH')
+            : 'TShark not found. Install Wireshark/TShark and ensure it is in your PATH'
+    );
+
+    // Export directory check
+    const exportDir = path.join(__dirname, 'exports');
+    try {
+        if (!fs.existsSync(exportDir)) {
+            fs.mkdirSync(exportDir, { recursive: true });
+        }
+        fs.accessSync(exportDir, fs.constants.W_OK);
+        record('Export Directory', 'pass', `Writable: ${exportDir}`);
+    } catch (error) {
+        record('Export Directory', 'fail', `Cannot write to ${exportDir}: ${error.message}`);
+    }
+
+    // Audio support hint
+    const audioHint = process.platform === 'darwin'
+        ? 'macOS detected: using afplay for alerts'
+        : process.platform === 'win32'
+            ? 'Windows detected: PowerShell beep API will be used'
+            : 'Linux detected: ensure "beep" package is installed for audio alerts';
+    record('Audio Alerts', 'pass', audioHint);
+
+    const icon = {
+        pass: chalk.green('[OK]'),
+        warn: chalk.yellow('[WARN]'),
+        fail: chalk.red('[FAIL]')
+    };
+
+    results.forEach(item => {
+        console.log(`${icon[item.status]} ${chalk.white(item.label)} ${chalk.gray('→')} ${chalk.white(item.message)}`);
+    });
+
+    const failures = results.filter(r => r.status === 'fail');
+    const warnings = results.filter(r => r.status === 'warn');
+
+    console.log('\n' + chalk.gray('Summary:'));
+    console.log(chalk.white(`  ${chalk.green(results.length - warnings.length - failures.length)} ok, ${chalk.yellow(warnings.length)} warnings, ${chalk.red(failures.length)} failures`));
+
+    if (failures.length === 0) {
+        console.log(chalk.green('\nEnvironment looks good! You are ready to capture traffic.'));
+    } else {
+        console.log(chalk.yellow('\nResolve the above issues before running SnifferX for the best experience.'));
+    }
+
+    console.log();
 }
 
 /**
@@ -433,9 +529,6 @@ async function startMonitoring(interfaceId, options) {
         
         // Export session data
         try {
-            const fs = require('fs');
-            const path = require('path');
-            
             // Create exports directory if it doesn't exist
             const exportDir = path.join(__dirname, 'exports');
             if (!fs.existsSync(exportDir)) {
@@ -608,9 +701,6 @@ program
     .action(() => {
         displayBanner();
         console.log(chalk.cyan.bold('Exported Session History\n'));
-        
-        const fs = require('fs');
-        const path = require('path');
         const exportDir = path.join(__dirname, 'exports');
         
         try {
@@ -702,6 +792,11 @@ program
             console.log(chalk.gray('Note: Some systems may not support audio beeps.\n'));
         }, 17000);
     });
+
+program
+    .command('doctor')
+    .description('Run diagnostics to verify environment and dependencies')
+    .action(runDiagnostics);
 
 // Quick Start command (interactive mode)
 program
@@ -823,14 +918,12 @@ if (process.argv.length === 2) {
     console.log(chalk.cyan('    config') + chalk.gray('      → Show detection configuration'));
     console.log(chalk.cyan('    exports') + chalk.gray('     → View session history and reports'));
     console.log(chalk.cyan('    test-audio') + chalk.gray('  → Test audio alert system'));
+    console.log(chalk.cyan('    doctor') + chalk.gray('      → Run environment diagnostics'));
     console.log(chalk.cyan('    stats') + chalk.gray('       → Show system statistics'));
     console.log(chalk.cyan('    help') + chalk.gray('        → Detailed help with examples'));
     console.log(chalk.cyan('    clear') + chalk.gray('       → Clear screen'));
     console.log(chalk.cyan('    exit') + chalk.gray('        → Exit SnifferX'));
     console.log(chalk.gray('\n  Tips: Use Up/Down arrows for command history | Press Ctrl+C to exit\n'));
-    
-    const commandHistory = [];
-    let historyIndex = -1;
     
     const rl = readline.createInterface({
         input: process.stdin,
@@ -880,6 +973,13 @@ if (process.argv.length === 2) {
             return;
         }
         
+        // Handle doctor command
+        if (command === 'doctor') {
+            await runDiagnostics();
+            rl.prompt();
+            return;
+        }
+
         // Handle version command
         if (command === 'version' || command === '-v' || command === '--version') {
             console.log(chalk.cyan('\nSnifferX v' + config.app.version + '\n'));
@@ -949,9 +1049,6 @@ if (process.argv.length === 2) {
                     // Inline exports display
                     displayBanner();
                     console.log(chalk.cyan.bold('Exported Session History\n'));
-                    
-                    const fs = require('fs');
-                    const path = require('path');
                     const exportDir = path.join(__dirname, 'exports');
                     
                     try {
@@ -1067,7 +1164,7 @@ if (process.argv.length === 2) {
                 console.log(chalk.red('\n[!] Error: ' + error.message + '\n'));
                 
                 // Suggest similar commands
-                const availableCommands = ['start', 'auto', 'interfaces', 'config', 'exports', 'test-audio', 'help', 'stats', 'clear', 'exit'];
+                const availableCommands = ['start', 'auto', 'interfaces', 'config', 'exports', 'test-audio', 'doctor', 'help', 'stats', 'clear', 'exit'];
                 const suggestions = availableCommands.filter(cmd => 
                     cmd.includes(command.toLowerCase()) || command.toLowerCase().includes(cmd)
                 );

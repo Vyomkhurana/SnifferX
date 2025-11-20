@@ -26,6 +26,7 @@
 **Smart Suggestions** - Get autocomplete hints when you mistype commands  
 **Session Tracking** - Unique session IDs and enhanced export metadata  
 **Quick Stats** - New `stats` command for instant system information  
+**System Diagnostics** - `snifferx doctor` validates Node, tshark, permissions, and export access before you start  
 
 [View Full Changelog](CHANGELOG.md)
 
@@ -167,12 +168,17 @@ npm install
 
 ### Quick Start - 3 Easy Steps!
 
-**Step 1:** Launch SnifferX Interactive Mode
+**Step 1 — Launch interactive mode**
 ```bash
 node snifferx.js
 ```
 
-**Step 2:** The interactive prompt appears - just type commands!
+**Step 2 — Run a quick health check (optional but recommended)**
+```bash
+snifferx> doctor       # Verifies Node version, tshark, permissions, exports
+```
+
+**Step 3 — Start monitoring**
 ```bash
 snifferx> start        # Guided setup (easiest)
 snifferx> auto         # Auto-detect interface
@@ -180,8 +186,19 @@ snifferx> interfaces   # List available interfaces
 snifferx> help         # Get help
 snifferx> exit         # Exit when done
 ```
+SnifferX will walk you through selecting the right interface, testing audio alerts, and exporting your first session.
 
-**Step 3:** That's it! SnifferX will guide you through the rest.
+### Essential Commands Cheat Sheet
+
+| Command | When to use | What it does |
+|---------|-------------|--------------|
+| `start` | First run | Guided wizard that lists interfaces and shows next steps |
+| `auto` | You just want to begin | Auto-detects the best interface and starts monitoring |
+| `doctor` | Unsure if your setup is ready | Checks Node version, admin rights, tshark, export folder, and audio backend |
+| `interfaces` | Need to choose an adapter | Lists every capture interface with IDs |
+| `monitor -i <id>` | Ready to sniff traffic | Starts full monitoring on the selected interface |
+| `stats` | Need quick telemetry | Shows tool version, Node version, platform, uptime, memory |
+| `exports` | Review past sessions | Prints export history with timestamps and file sizes |
 
 ### Alternative - Direct Commands
 
@@ -193,6 +210,9 @@ node snifferx.js start
 
 # Auto-detect and start immediately
 node snifferx.js auto
+
+# Run diagnostics before monitoring
+node snifferx.js doctor
 
 # Manual interface selection
 node snifferx.js interfaces        # List interfaces
