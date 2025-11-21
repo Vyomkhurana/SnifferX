@@ -2,6 +2,30 @@
 
 All notable changes to SnifferX will be documented in this file.
 
+## [1.2.0] - 2025-11-21
+
+### Added
+- **Animated Loading Spinners**: Beautiful rotating spinner animations for async operations (scanning interfaces, initializing engines)
+- **Progressive Engine Loading**: Sequenced loading display with checkmarks as each detection engine initializes
+- **Enhanced Success/Error Messages**: Color-coded feedback with icons (✓, ✗, ℹ, ⚠) for better visual clarity
+- **Countdown Timer**: Auto-start countdown with real-time display when using `auto` command
+- **Improved Interface Listing**: Network interfaces now display with icons (🌐 for Ethernet/WiFi, 🔌 for others)
+- **Better Final Report**: Enhanced session summary with visual indicators, threat status badges, and organized layout
+
+### Improved
+- **Visual Hierarchy**: Better use of colors, icons, and spacing throughout the CLI
+- **Error Handling**: More helpful error messages with troubleshooting steps
+- **Status Indicators**: Replaced plain text with visual symbols (●, ○, ◐) for better status recognition
+- **Command Feedback**: All operations now provide clear visual confirmation
+- **Dashboard Layout**: Cleaner organization with better use of box-drawing characters
+- **Capture Initialization**: Now shows session ID and more details when starting
+
+### Technical
+- Added `showSpinner()` utility for async operation feedback
+- Added `showSuccess()`, `showError()`, `showInfo()`, `showWarning()` helper functions
+- Enhanced color scheme with better contrast and readability
+- Improved user experience with progressive disclosure of information
+
 ## [1.1.0] - 2025-11-15
 
 ### Added

@@ -39,6 +39,70 @@ function formatUptime(seconds) {
     return parts.join(' ');
 }
 
+// Utility: Loading spinner for async operations
+function showSpinner(message, duration = 2000) {
+    const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+    let i = 0;
+    const interval = setInterval(() => {
+        process.stdout.write(`\r${chalk.cyan(frames[i % frames.length])} ${chalk.white(message)}`);
+        i++;
+    }, 80);
+    
+    return () => {
+        clearInterval(interval);
+        process.stdout.write('\r' + ' '.repeat(message.length + 3) + '\r');
+    };
+}
+
+// Utility: Success/error message helpers
+function showSuccess(message) {
+    console.log(chalk.green('✓') + ' ' + chalk.white(message));
+}
+
+function showError(message, details = '') {
+    console.log(chalk.red('✗') + ' ' + chalk.white(message));
+    if (details) {
+        console.log(chalk.gray('  └─ ') + chalk.yellow(details));
+    }
+}
+
+function showInfo(message) {
+    console.log(chalk.blue('ℹ') + ' ' + chalk.white(message));
+}
+
+function showWarning(message) {
+    console.log(chalk.yellow('⚠') + ' ' + chalk.white(message));
+}
+
+// Utility: Loading spinner for async operations
+function showSpinner(message, duration = 2000) {
+    const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+    let i = 0;
+    const interval = setInterval(() => {
+        process.stdout.write(`\r${chalk.cyan(frames[i % frames.length])} ${chalk.white(message)}`);
+        i++;
+    }, 80);
+    
+    return () => {
+        clearInterval(interval);
+        process.stdout.write('\r' + ' '.repeat(message.length + 3) + '\r');
+    };
+}
+
+// Utility: Progress bar for visual feedback
+function showProgress(current, total, label = 'Progress') {
+    const percentage = Math.floor((current / total) * 100);
+    const filled = Math.floor(percentage / 2);
+    const empty = 50 - filled;
+    const bar = '█'.repeat(filled) + '░'.repeat(empty);
+    
+    process.stdout.write(`\r${chalk.cyan(label)}: [${chalk.green(bar)}] ${chalk.white(percentage + '%')}`);
+    
+    if (current === total) {
+        console.log(); // New line when complete
+    }
+}
+
 // Enhanced ASCII Art Banner with gradient effect
 const displayBanner = () => {
     console.clear();
@@ -442,7 +506,23 @@ async function startMonitoring(interfaceId, options) {
         global.audioSystem.playStartupSound();
     }
     
-    console.log(chalk.cyan.bold('Loading Detection Engines...\n'));
+    console.log(chalk.cyan.bold('\n⚡ Initializing Detection Engines...\n'));
+    
+    const engines = [
+        { name: 'DDoS Attack Detection', icon: '🛡️' },
+        { name: 'Port Scan Detection', icon: '🔍' },
+        { name: 'IP Spoofing Detection', icon: '🎭' },
+        { name: 'User Behavior Analytics', icon: '👤' }
+    ];
+    
+    // Initialize with progress
+    engines.forEach((engine, index) => {
+        setTimeout(() => {
+            console.log(chalk.green('  ✓') + ` ${engine.icon}  ${chalk.white(engine.name)}`);
+        }, index * 200);
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, engines.length * 200 + 300));
     
     // Initialize detectors
     const detectors = {
@@ -451,11 +531,6 @@ async function startMonitoring(interfaceId, options) {
         ipSpoofing: new IPSpoofingDetector(config),
         userBehavior: new UserBehaviorAnalytics(config)
     };
-    
-    console.log(chalk.green('  [+] DDoS Attack Detection'));
-    console.log(chalk.green('  [+] Port Scanning Detection'));
-    console.log(chalk.green('  [+] IP Spoofing Detection'));
-    console.log(chalk.green('  [+] User Behavior Analytics'));
     console.log(chalk.green('  [+] Audio Alert System'));
     
     console.log(chalk.cyan.bold('\nStarting Packet Capture...\n'));
@@ -507,25 +582,28 @@ async function startMonitoring(interfaceId, options) {
         
         const captureStats = manager.stop();
         
-        // Final report
-        console.log(chalk.cyan.bold('═══════════════════════════════════════════════════════════'));
-        console.log(chalk.cyan.bold('                      FINAL REPORT'));
-        console.log(chalk.cyan.bold('═══════════════════════════════════════════════════════════\n'));
-        
-        console.log(chalk.white('Session Summary:'));
-        console.log(chalk.gray('  Duration:        ') + chalk.cyan(captureStats.duration));
-        console.log(chalk.gray('  Total Packets:   ') + chalk.cyan(captureStats.totalPackets.toLocaleString()));
-        console.log(chalk.gray('  Average Rate:    ') + chalk.cyan(captureStats.packetsPerSecond + ' pps'));
+        // Final report with enhanced visuals
+        console.log(chalk.bgCyan.black.bold('\n' + ' '.repeat(67)));
+        console.log(chalk.bgCyan.black.bold('                     📊 FINAL SESSION REPORT                        '));
+        console.log(chalk.bgCyan.black.bold(' '.repeat(67) + '\n'));
         
         const totalAlerts = stats.alerts.ddos + stats.alerts.portScan + stats.alerts.ipSpoofing + stats.alerts.userBehavior;
-        console.log(chalk.white('\nThreat Summary:'));
-        console.log(chalk.gray('  Total Alerts:    ') + (totalAlerts > 0 ? chalk.red(totalAlerts) : chalk.green('0')));
-        console.log(chalk.gray('  DDoS Attacks:    ') + (stats.alerts.ddos > 0 ? chalk.red(stats.alerts.ddos) : chalk.green('0')));
-        console.log(chalk.gray('  Port Scans:      ') + (stats.alerts.portScan > 0 ? chalk.red(stats.alerts.portScan) : chalk.green('0')));
-        console.log(chalk.gray('  IP Spoofing:     ') + (stats.alerts.ipSpoofing > 0 ? chalk.red(stats.alerts.ipSpoofing) : chalk.green('0')));
-        console.log(chalk.gray('  User Anomalies:  ') + (stats.alerts.userBehavior > 0 ? chalk.red(stats.alerts.userBehavior) : chalk.green('0')));
+        const sessionStatus = totalAlerts === 0 ? chalk.green.bold('✓ CLEAN SESSION') : totalAlerts < 5 ? chalk.yellow.bold('⚠ MINOR THREATS') : chalk.red.bold('⚠ THREATS DETECTED');
         
-        console.log(chalk.cyan.bold('\n═══════════════════════════════════════════════════════════\n'));
+        console.log(chalk.white.bold('  Session Summary'));
+        console.log(chalk.gray('  ├─ ') + chalk.white('Duration:       ') + chalk.cyan.bold(captureStats.duration));
+        console.log(chalk.gray('  ├─ ') + chalk.white('Total Packets:  ') + chalk.cyan.bold(captureStats.totalPackets.toLocaleString()));
+        console.log(chalk.gray('  ├─ ') + chalk.white('Average Rate:   ') + chalk.cyan.bold(captureStats.packetsPerSecond + ' pps'));
+        console.log(chalk.gray('  └─ ') + chalk.white('Status:         ') + sessionStatus);
+        
+        console.log(chalk.white.bold('\n  Threat Analysis'));
+        console.log(chalk.gray('  ├─ ') + chalk.white('Total Alerts:   ') + (totalAlerts > 0 ? chalk.red.bold(totalAlerts) : chalk.green.bold('0 - All Clear')));
+        console.log(chalk.gray('  ├─ ') + chalk.white('DDoS Attacks:   ') + (stats.alerts.ddos > 0 ? chalk.red.bold('● ' + stats.alerts.ddos) : chalk.gray('○ 0')));
+        console.log(chalk.gray('  ├─ ') + chalk.white('Port Scans:     ') + (stats.alerts.portScan > 0 ? chalk.yellow.bold('● ' + stats.alerts.portScan) : chalk.gray('○ 0')));
+        console.log(chalk.gray('  ├─ ') + chalk.white('IP Spoofing:    ') + (stats.alerts.ipSpoofing > 0 ? chalk.magenta.bold('● ' + stats.alerts.ipSpoofing) : chalk.gray('○ 0')));
+        console.log(chalk.gray('  └─ ') + chalk.white('User Anomalies: ') + (stats.alerts.userBehavior > 0 ? chalk.cyan.bold('● ' + stats.alerts.userBehavior) : chalk.gray('○ 0')));
+        
+        console.log(chalk.gray('\n' + '─'.repeat(70)));
         
         // Export session data
         try {
@@ -598,22 +676,39 @@ async function startMonitoring(interfaceId, options) {
 async function listInterfaces() {
     displayBanner();
     
-    console.log(chalk.cyan.bold('Available Network Interfaces\n'));
+    const stopSpinner = showSpinner('Scanning network interfaces...');
     
     try {
         const interfaces = await CaptureManager.listInterfaces();
+        stopSpinner();
         
-        console.log(chalk.gray('─'.repeat(70)));
-        interfaces.forEach(iface => {
-            console.log(`  ${chalk.cyan(iface.id.padEnd(3))} ${chalk.white('|')} ${chalk.green(iface.description || iface.name)}`);
+        console.log(chalk.cyan.bold('\n╔══════════════════════════════════════════════════════════════════╗'));
+        console.log(chalk.cyan.bold('║            Available Network Interfaces                          ║'));
+        console.log(chalk.cyan.bold('╚══════════════════════════════════════════════════════════════════╝\n'));
+        
+        interfaces.forEach((iface, index) => {
+            const isEthernet = iface.description?.toLowerCase().includes('ethernet') || 
+                              iface.description?.toLowerCase().includes('wi-fi');
+            const icon = isEthernet ? '🌐' : '🔌';
+            const color = isEthernet ? chalk.green : chalk.gray;
+            
+            console.log(`  ${chalk.cyan.bold(iface.id.toString().padStart(2))}  ${icon}  ${color(iface.description || iface.name)}`);
         });
-        console.log(chalk.gray('─'.repeat(70)));
         
-        console.log(chalk.yellow('\nUsage: ') + chalk.white('snifferx monitor -i <interface-id>'));
-        console.log(chalk.gray('   Example: ') + chalk.cyan('snifferx monitor -i 7\n'));
+        console.log(chalk.gray('\n' + '─'.repeat(70)));
+        console.log(chalk.white('\n  Quick Start:'));
+        console.log(chalk.cyan('    snifferx monitor -i <id>') + chalk.gray('  →  Start monitoring a specific interface'));
+        console.log(chalk.cyan('    snifferx auto') + chalk.gray('              →  Auto-detect and start immediately'));
+        console.log(chalk.gray('\n  Example: ') + chalk.green('snifferx monitor -i 7') + chalk.gray(' (monitors interface 7)\n'));
         
     } catch (error) {
-        console.log(chalk.red('[!] Failed to list interfaces: ' + error.message + '\n'));
+        stopSpinner();
+        console.log(chalk.red.bold('\n✗ Error: ') + chalk.white('Failed to list interfaces'));
+        console.log(chalk.gray('  Reason: ') + chalk.yellow(error.message));
+        console.log(chalk.gray('\n  Troubleshooting:'));
+        console.log(chalk.white('    1. Run ') + chalk.cyan('snifferx doctor') + chalk.white(' to check your setup'));
+        console.log(chalk.white('    2. Ensure TShark/Wireshark is installed'));
+        console.log(chalk.white('    3. Run with administrator/root privileges\n'));
         process.exit(1);
     }
 }
@@ -624,24 +719,59 @@ async function listInterfaces() {
 function showConfig() {
     displayBanner();
     
-    console.log(chalk.cyan.bold('Detection Configuration\n'));
+    console.log(chalk.cyan.bold('╔════════════════════════════════════════════════════════════════╗'));
+    console.log(chalk.cyan.bold('║              Detection Configuration                           ║'));
+    console.log(chalk.cyan.bold('╚════════════════════════════════════════════════════════════════╝\n'));
     
-    console.log(chalk.bold('DDoS Detection:'));
-    console.log(`  Threshold:     ${chalk.cyan(config.detection.ddos.packetsPerSecondThreshold)} pps`);
-    console.log(`  Time Window:   ${chalk.cyan(config.detection.ddos.timeWindow)}s`);
-    console.log(`  Status:        ${config.detection.ddos.enabled ? chalk.green('[+] Enabled') : chalk.red('[-] Disabled')}`);
+    const detectionEngines = [
+        {
+            name: '🛡️  DDoS Attack Detection',
+            config: config.detection.ddos,
+            settings: [
+                { label: 'Threshold', value: config.detection.ddos.packetsPerSecondThreshold + ' pps' },
+                { label: 'Time Window', value: config.detection.ddos.timeWindow + 's' },
+            ]
+        },
+        {
+            name: '🔍 Port Scan Detection',
+            config: config.detection.portScanning,
+            settings: [
+                { label: 'Threshold', value: config.detection.portScanning.distinctPortsThreshold + ' ports' },
+                { label: 'Time Window', value: config.detection.portScanning.timeWindow + 's' },
+            ]
+        },
+        {
+            name: '🎭 IP Spoofing Detection',
+            config: config.detection.ipSpoofing,
+            settings: [
+                { label: 'TTL Threshold', value: config.detection.ipSpoofing.ttlVarianceThreshold + ' hops' },
+                { label: 'TTL Check', value: config.detection.ipSpoofing.checkTTL ? 'Enabled' : 'Disabled' },
+            ]
+        },
+        {
+            name: '👤 User Behavior Analytics',
+            config: config.detection.userBehavior,
+            settings: [
+                { label: 'Learning Period', value: (config.detection.userBehavior.learningPeriod / 3600000) + ' hours' },
+                { label: 'Risk Threshold', value: config.detection.userBehavior.riskScoreThreshold },
+            ]
+        }
+    ];
     
-    console.log(chalk.bold('\nPort Scan Detection:'));
-    console.log(`  Threshold:     ${chalk.cyan(config.detection.portScanning.distinctPortsThreshold)} ports`);
-    console.log(`  Time Window:   ${chalk.cyan(config.detection.portScanning.timeWindow)}s`);
-    console.log(`  Status:        ${config.detection.portScanning.enabled ? chalk.green('[+] Enabled') : chalk.red('[-] Disabled')}`);
+    detectionEngines.forEach(engine => {
+        const status = engine.config.enabled ? chalk.green.bold('✓ ACTIVE') : chalk.red('✗ DISABLED');
+        console.log(chalk.white.bold(engine.name) + '  ' + status);
+        console.log(chalk.gray('  ├─ ') + chalk.white(engine.settings[0].label.padEnd(15)) + chalk.cyan(engine.settings[0].value));
+        engine.settings.slice(1).forEach((setting, index) => {
+            const prefix = index === engine.settings.length - 2 ? '  └─ ' : '  ├─ ';
+            console.log(chalk.gray(prefix) + chalk.white(setting.label.padEnd(15)) + chalk.cyan(setting.value));
+        });
+        console.log();
+    });
     
-    console.log(chalk.bold('\nIP Spoofing Detection:'));
-    console.log(`  TTL Threshold: ${chalk.cyan(config.detection.ipSpoofing.ttlVarianceThreshold)} hops`);
-    console.log(`  TTL Check:     ${config.detection.ipSpoofing.checkTTL ? chalk.green('[+] Enabled') : chalk.red('[-] Disabled')}`);
-    console.log(`  Status:        ${config.detection.ipSpoofing.enabled ? chalk.green('[+] Enabled') : chalk.red('[-] Disabled')}`);
-    
-    console.log('\n');
+    console.log(chalk.gray('─'.repeat(68)));
+    console.log(chalk.yellow('\n  Audio Alerts: ') + (config.audio.enabled ? chalk.green('🔊 Enabled') : chalk.gray('🔇 Disabled')));
+    console.log(chalk.white('  Test audio: ') + chalk.cyan('snifferx test-audio\n'));
 }
 
 // Create CLI program

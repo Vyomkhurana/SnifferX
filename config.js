@@ -9,7 +9,7 @@ const config = {
     // Application Information
     app: {
         name: 'SnifferX',
-        version: '1.1.0',
+        version: '1.2.0',
         author: 'Vyom Khurana',
         description: 'Network Traffic Analyzer',
         github: 'https://github.com/Vyomkhurana/SnifferX'
