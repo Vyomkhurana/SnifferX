@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)]()
-[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://github.com/Vyomkhurana/SnifferX)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue)](https://github.com/Vyomkhurana/SnifferX)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Vyomkhurana/SnifferX/pulls)
 [![Stars](https://img.shields.io/github/stars/Vyomkhurana/SnifferX?style=social)](https://github.com/Vyomkhurana/SnifferX/stargazers)
 
@@ -19,14 +19,14 @@
 
 ---
 
-## 🆕 What's New in v1.1.0
+## 🆕 What's New in v1.3.0
 
-**Interactive CLI Mode** - Just run `node snifferx.js` and start typing commands! No need to restart between commands.  
-**Enhanced Dashboard** - Beautiful color-coded interface with progress bars and visual indicators  
-**Smart Suggestions** - Get autocomplete hints when you mistype commands  
-**Session Tracking** - Unique session IDs and enhanced export metadata  
-**Quick Stats** - New `stats` command for instant system information  
-**System Diagnostics** - `snifferx doctor` validates Node, tshark, permissions, and export access before you start  
+**Backend Integration** - Send threats to external services in real-time! Connect to SIEM platforms, webhooks, or custom APIs.  
+**Real-Time Data Forwarding** - Automatic threat forwarding with retry logic and queue management  
+**REST API Support** - Configure multiple endpoints for alerts, statistics, and packet streaming  
+**Connection Testing** - New `test-backend` command validates connectivity before deployment  
+**Dashboard Integration** - Live backend statistics displayed during monitoring  
+**Enterprise Ready** - API key authentication, configurable timeouts, and success rate tracking  
 
 [View Full Changelog](CHANGELOG.md)
 
@@ -59,6 +59,7 @@ SnifferX is an advanced network security monitoring tool that provides **real-ti
 | **User Behavior Analytics** | ML-based anomaly detection for unusual network patterns | Active |
 | **Audio Alert System** | Real-time sound notifications for different threat types | Active |
 | **Threat Visualization** | Color-coded live threat history with timestamps and severity | Active |
+| **Backend Integration** | REST API integration for real-time data forwarding to external services | Active |
 
 ### Core Capabilities
 
@@ -199,6 +200,7 @@ SnifferX will walk you through selecting the right interface, testing audio aler
 | `monitor -i <id>` | Ready to sniff traffic | Starts full monitoring on the selected interface |
 | `stats` | Need quick telemetry | Shows tool version, Node version, platform, uptime, memory |
 | `exports` | Review past sessions | Prints export history with timestamps and file sizes |
+| `test-backend` | Verify backend integration | Tests connectivity to configured API endpoints |
 
 ### Alternative - Direct Commands
 
@@ -314,6 +316,73 @@ audio: {
     playOnStartup: true,                    // Startup sound
     playOnShutdown: true,                   // Shutdown sound
     emergencyThreshold: 5                   // Alerts for emergency siren
+}
+```
+
+### Backend Integration (NEW in v1.3.0)
+
+Connect SnifferX to external services for real-time threat forwarding:
+
+```javascript
+backend: {
+    enabled: false,                         // Enable/disable backend integration
+    apiKey: '',                             // API key for authentication
+    retryAttempts: 3,                       // Retry failed requests
+    timeout: 5000,                          // Request timeout (ms)
+    endpoints: {
+        alerts: '',                         // Webhook for threat alerts
+        stats: '',                          // Endpoint for session statistics
+        threats: '',                        // Endpoint for threat events
+        stream: ''                          // Endpoint for packet streaming (optional)
+    }
+}
+```
+
+**Payload Format** - All threats sent as JSON:
+```json
+{
+  "type": "threat_detected",
+  "timestamp": "2025-11-23T10:30:45.123Z",
+  "threat": {
+    "id": "threat-1732356645123-abc123",
+    "type": "ddos",
+    "severity": "high",
+    "source": "192.168.1.100",
+    "destination": "10.0.0.1",
+    "details": "DDoS attack detected: 1250 pps from 192.168.1.100",
+    "confidence": "high",
+    "packetsPerSecond": 1250
+  }
+}
+```
+
+**Test Your Backend**:
+```bash
+# Verify connectivity before deployment
+snifferx test-backend
+
+# Example output:
+# ✓ Connection successful!
+# Backend is reachable and ready to receive threat data.
+```
+
+**Integration Examples**:
+- **Slack Webhook**: `https://hooks.slack.com/services/YOUR/WEBHOOK/URL`
+- **Discord Webhook**: `https://discord.com/api/webhooks/YOUR/WEBHOOK/URL`
+- **Splunk HEC**: `https://your-splunk.com:8088/services/collector/event`
+- **Custom API**: `https://your-api.com/api/v1/security/alerts`
+
+**Environment Variables** (Recommended for API keys):
+```bash
+# Set in .env file or system environment
+SNIFFERX_API_KEY=your-secret-api-key-here
+```
+
+Then in `config.js`:
+```javascript
+backend: {
+    apiKey: process.env.SNIFFERX_API_KEY || '',
+    // ... other settings
 }
 ```
 

@@ -9,7 +9,7 @@ const config = {
     // Application Information
     app: {
         name: 'SnifferX',
-        version: '1.2.0',
+        version: '1.3.0',
         author: 'Vyom Khurana',
         description: 'Network Traffic Analyzer',
         github: 'https://github.com/Vyomkhurana/SnifferX'
@@ -109,6 +109,20 @@ const config = {
         requireElevatedPrivileges: true,
         maxConcurrentCaptures: 1,
         autoStopOnError: true
+    },
+
+    // Backend Integration (NEW IN v1.3.0)
+    backend: {
+        enabled: false,                     // Enable/disable backend integration
+        apiKey: '',                         // API key for authentication (set via environment variable)
+        retryAttempts: 3,                   // Number of retry attempts for failed requests
+        timeout: 5000,                      // Request timeout in milliseconds
+        endpoints: {
+            alerts: '',                     // Webhook URL for threat alerts
+            stats: '',                      // Endpoint for session statistics
+            threats: '',                    // Endpoint for threat detection events
+            stream: ''                      // Endpoint for real-time packet streaming (optional)
+        }
     }
 };
 

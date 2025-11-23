@@ -2,6 +2,60 @@
 
 All notable changes to SnifferX will be documented in this file.
 
+## [1.3.0] - 2025-11-23
+
+### Added
+- **Backend Integration System**: Send threat data to external services in real-time
+  - REST API support for webhooks and HTTPS endpoints
+  - Configurable endpoints for alerts, statistics, threats, and packet streaming
+  - Automatic retry logic with exponential backoff (configurable retry attempts)
+  - Request queuing to prevent overwhelming backend services
+  - Built-in connection testing with `test-backend` command
+  - API key authentication support
+  - Integration statistics tracking (sent, failed, queued, success rate)
+
+- **New Commands**:
+  - `test-backend` / `backend-test`: Verify connectivity to configured backend endpoints
+  - Shows configuration details and connection status
+  - Provides troubleshooting steps on failure
+
+- **Real-Time Threat Forwarding**: All detected threats automatically sent to backend when enabled
+  - DDoS attacks with packets-per-second metrics
+  - Port scans with ports-scanned count
+  - IP spoofing events with confidence levels
+  - User behavior anomalies with risk scores
+  - Standardized JSON payload format with metadata
+
+- **Backend Status in Dashboard**: Live backend statistics displayed during monitoring
+  - Connection status indicator
+  - Alerts sent/failed counters
+  - Queue depth monitoring
+  - Success rate percentage
+
+### Configuration
+- **New `backend` Section in config.js**:
+  - `enabled`: Toggle backend integration on/off
+  - `apiKey`: Authentication for API requests
+  - `retryAttempts`: Number of retry attempts (default: 3)
+  - `timeout`: Request timeout in milliseconds (default: 5000)
+  - `endpoints`: Configure URLs for alerts, stats, threats, and streaming
+
+### Technical
+- Created `BackendIntegration` class in `src/integrations/backendIntegration.js`
+- HTTP/HTTPS request handling with native Node.js modules
+- Queue-based packet streaming to prevent backend overload
+- Graceful error handling with detailed logging
+- Session-level integration lifecycle management
+- Async/await pattern for non-blocking operation
+
+### Integration Use Cases
+- Forward threats to SIEM platforms (Splunk, ELK, QRadar)
+- Real-time notifications via webhooks (Slack, Discord, Teams)
+- Centralized logging and analytics
+- Custom dashboards and visualization tools
+- SOC automation and incident response workflows
+- Data lake integration for historical analysis
+
 ## [1.2.0] - 2025-11-21
 
 ### Added

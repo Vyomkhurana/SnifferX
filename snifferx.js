@@ -21,6 +21,7 @@ const PortScanDetector = require('./src/detection/portScanDetector');
 const IPSpoofingDetector = require('./src/detection/ipSpoofingDetector');
 const UserBehaviorAnalytics = require('./src/detection/userBehaviorAnalytics');
 const AudioAlertSystem = require('./src/audio/audioAlertSystem');
+const BackendIntegration = require('./src/integrations/backendIntegration');
 const utils = require('./utils');
 
 // Utility: Format uptime in human-readable format
@@ -268,6 +269,18 @@ function displayDashboard() {
         });
     }
     
+    // Backend Integration Status
+    if (global.backendIntegration && config.backend.enabled) {
+        const backendStats = global.backendIntegration.getStats();
+        console.log('\n' + chalk.bgCyan.black.bold(' BACKEND INTEGRATION ') + chalk.cyan(' ▼'));
+        console.log(chalk.gray('───────────────────────────────────────────────────────────'));
+        console.log(`  ${chalk.white.bold('Status:')}         ${chalk.green.bold('● CONNECTED')}`);
+        console.log(`  ${chalk.white.bold('Alerts Sent:')}    ${chalk.cyan.bold(backendStats.sent)}`);
+        console.log(`  ${chalk.white.bold('Failed:')}         ${chalk.yellow.bold(backendStats.failed)}`);
+        console.log(`  ${chalk.white.bold('Queued:')}         ${chalk.gray.bold(backendStats.queued)}`);
+        console.log(`  ${chalk.white.bold('Success Rate:')}   ${chalk.green.bold(backendStats.successRate)}`);
+    }
+    
     console.log(chalk.gray('\n╔═══════════════════════════════════════════════════════════╗'));
     console.log(chalk.gray('║ ') + chalk.yellow.bold('Press Ctrl+C to stop monitoring') + chalk.gray('                        ║'));
     console.log(chalk.gray('╚═══════════════════════════════════════════════════════════╝\n'));
@@ -401,6 +414,18 @@ function handlePacket(packet, detectors) {
             `${ddosAlert.packetsPerSecond} pps detected`
         );
         
+        // Send to backend
+        if (global.backendIntegration) {
+            global.backendIntegration.sendThreatEvent({
+                type: 'ddos',
+                severity: ddosAlert.severity,
+                source: packet.srcIP || 'Unknown',
+                details: ddosAlert.message,
+                confidence: 'high',
+                packetsPerSecond: ddosAlert.packetsPerSecond
+            });
+        }
+        
         // PLAY AUDIO ALERT!
         if (global.audioSystem) {
             global.audioSystem.playAlert('ddos', ddosAlert.severity);
@@ -423,6 +448,18 @@ function handlePacket(packet, detectors) {
             packet.srcIP || 'Unknown',
             `Scanning ${portScanAlert.portsScanned || 'multiple'} ports`
         );
+        
+        // Send to backend
+        if (global.backendIntegration) {
+            global.backendIntegration.sendThreatEvent({
+                type: 'port_scan',
+                severity: portScanAlert.severity,
+                source: packet.srcIP || 'Unknown',
+                details: portScanAlert.message,
+                confidence: 'medium',
+                portsScanned: portScanAlert.portsScanned
+            });
+        }
         
         // PLAY AUDIO ALERT!
         if (global.audioSystem) {
@@ -447,6 +484,17 @@ function handlePacket(packet, detectors) {
             `TTL anomaly detected`
         );
         
+        // Send to backend
+        if (global.backendIntegration) {
+            global.backendIntegration.sendThreatEvent({
+                type: 'ip_spoofing',
+                severity: spoofingAlert.severity,
+                source: packet.srcIP || 'Unknown',
+                details: spoofingAlert.message,
+                confidence: 'high'
+            });
+        }
+        
         // PLAY AUDIO ALERT!
         if (global.audioSystem) {
             global.audioSystem.playAlert('ip_spoofing', spoofingAlert.severity);
@@ -469,6 +517,18 @@ function handlePacket(packet, detectors) {
             userBehaviorAlert.user || 'Unknown',
             `Risk score: ${userBehaviorAlert.riskScore || 'N/A'}`
         );
+        
+        // Send to backend
+        if (global.backendIntegration) {
+            global.backendIntegration.sendThreatEvent({
+                type: 'user_behavior',
+                severity: userBehaviorAlert.severity,
+                source: userBehaviorAlert.user || 'Unknown',
+                details: userBehaviorAlert.message,
+                confidence: 'medium',
+                riskScore: userBehaviorAlert.riskScore
+            });
+        }
         
         // PLAY AUDIO ALERT!
         if (global.audioSystem) {
@@ -498,12 +558,25 @@ async function startMonitoring(interfaceId, options) {
     console.log(chalk.gray('Interface ID: ') + chalk.cyan(interfaceId));
     console.log(chalk.gray('Time: ') + chalk.white(utils.getFormattedTimestamp()));
     console.log(chalk.gray('Audio Alerts: ') + (config.audio.enabled ? chalk.green('Enabled') : chalk.yellow('Disabled')));
+    console.log(chalk.gray('Backend Integration: ') + (config.backend.enabled ? chalk.green('Enabled') : chalk.gray('Disabled')));
     console.log();
     
     // Initialize Audio Alert System (UNIQUE FEATURE!)
     global.audioSystem = new AudioAlertSystem(config);
     if (config.audio.playOnStartup) {
         global.audioSystem.playStartupSound();
+    }
+    
+    // Initialize Backend Integration
+    global.backendIntegration = new BackendIntegration(config);
+    if (config.backend.enabled) {
+        console.log(chalk.cyan('[Backend] Testing connection...'));
+        const testResult = await global.backendIntegration.testConnection();
+        if (testResult.success) {
+            console.log(chalk.green('[Backend] ✓ Connected successfully\n'));
+        } else {
+            console.log(chalk.yellow(`[Backend] ⚠ ${testResult.message}\n`));
+        }
     }
     
     console.log(chalk.cyan.bold('\n⚡ Initializing Detection Engines...\n'));
@@ -924,6 +997,55 @@ program
     });
 
 program
+    .command('test-backend')
+    .alias('backend-test')
+    .description('Test backend integration connectivity')
+    .action(async () => {
+        displayBanner();
+        console.log(chalk.cyan.bold('Backend Integration Test\n'));
+        
+        if (!config.backend.enabled) {
+            console.log(chalk.yellow('[!] Backend integration is disabled in config.js\n'));
+            console.log(chalk.gray('To enable it, update your config.js:\n'));
+            console.log(chalk.white('  backend: {'));
+            console.log(chalk.white('    enabled: true,'));
+            console.log(chalk.white('    apiKey: "your-api-key",'));
+            console.log(chalk.white('    endpoints: {'));
+            console.log(chalk.white('      alerts: "https://your-backend.com/api/alerts"'));
+            console.log(chalk.white('    }'));
+            console.log(chalk.white('  }\n'));
+            return;
+        }
+        
+        const backend = new BackendIntegration(config);
+        
+        console.log(chalk.white('Testing connection to backend...\n'));
+        console.log(chalk.gray('Configuration:'));
+        console.log(chalk.gray('  Alerts Endpoint:  ') + chalk.cyan(config.backend.endpoints.alerts || 'Not configured'));
+        console.log(chalk.gray('  Stats Endpoint:   ') + chalk.cyan(config.backend.endpoints.stats || 'Not configured'));
+        console.log(chalk.gray('  Threats Endpoint: ') + chalk.cyan(config.backend.endpoints.threats || 'Not configured'));
+        console.log(chalk.gray('  Stream Endpoint:  ') + chalk.cyan(config.backend.endpoints.stream || 'Not configured'));
+        console.log();
+        
+        const stopSpinner = showSpinner('Connecting to backend...');
+        const result = await backend.testConnection();
+        stopSpinner();
+        
+        if (result.success) {
+            console.log(chalk.green.bold('\n✓ Connection successful!\n'));
+            console.log(chalk.white('Backend is reachable and ready to receive threat data.\n'));
+        } else {
+            console.log(chalk.red.bold('\n✗ Connection failed\n'));
+            console.log(chalk.yellow('Error: ') + chalk.white(result.message + '\n'));
+            console.log(chalk.gray('Troubleshooting:'));
+            console.log(chalk.white('  1. Verify endpoint URLs are correct'));
+            console.log(chalk.white('  2. Check your API key is valid'));
+            console.log(chalk.white('  3. Ensure backend server is running'));
+            console.log(chalk.white('  4. Verify network connectivity\n'));
+        }
+    });
+
+program
     .command('doctor')
     .description('Run diagnostics to verify environment and dependencies')
     .action(runDiagnostics);
@@ -1048,6 +1170,7 @@ if (process.argv.length === 2) {
     console.log(chalk.cyan('    config') + chalk.gray('      → Show detection configuration'));
     console.log(chalk.cyan('    exports') + chalk.gray('     → View session history and reports'));
     console.log(chalk.cyan('    test-audio') + chalk.gray('  → Test audio alert system'));
+    console.log(chalk.cyan('    test-backend') + chalk.gray('→ Test backend integration'));
     console.log(chalk.cyan('    doctor') + chalk.gray('      → Run environment diagnostics'));
     console.log(chalk.cyan('    stats') + chalk.gray('       → Show system statistics'));
     console.log(chalk.cyan('    help') + chalk.gray('        → Detailed help with examples'));
@@ -1274,6 +1397,56 @@ if (process.argv.length === 2) {
                 });
             
             subProgram
+                .command('test-backend')
+                .description('Test backend integration connectivity')
+                .action(async () => {
+                    displayBanner();
+                    console.log(chalk.cyan.bold('Backend Integration Test\n'));
+                    
+                    if (!config.backend.enabled) {
+                        console.log(chalk.yellow('[!] Backend integration is disabled in config.js\n'));
+                        console.log(chalk.gray('To enable it, update your config.js:\n'));
+                        console.log(chalk.white('  backend: {'));
+                        console.log(chalk.white('    enabled: true,'));
+                        console.log(chalk.white('    apiKey: "your-api-key",'));
+                        console.log(chalk.white('    endpoints: {'));
+                        console.log(chalk.white('      alerts: "https://your-backend.com/api/alerts"'));
+                        console.log(chalk.white('    }'));
+                        console.log(chalk.white('  }\n'));
+                        rl.prompt();
+                        return;
+                    }
+                    
+                    const backend = new BackendIntegration(config);
+                    
+                    console.log(chalk.white('Testing connection to backend...\n'));
+                    console.log(chalk.gray('Configuration:'));
+                    console.log(chalk.gray('  Alerts Endpoint:  ') + chalk.cyan(config.backend.endpoints.alerts || 'Not configured'));
+                    console.log(chalk.gray('  Stats Endpoint:   ') + chalk.cyan(config.backend.endpoints.stats || 'Not configured'));
+                    console.log(chalk.gray('  Threats Endpoint: ') + chalk.cyan(config.backend.endpoints.threats || 'Not configured'));
+                    console.log(chalk.gray('  Stream Endpoint:  ') + chalk.cyan(config.backend.endpoints.stream || 'Not configured'));
+                    console.log();
+                    
+                    const stopSpinner = showSpinner('Connecting to backend...');
+                    const result = await backend.testConnection();
+                    stopSpinner();
+                    
+                    if (result.success) {
+                        console.log(chalk.green.bold('\n✓ Connection successful!\n'));
+                        console.log(chalk.white('Backend is reachable and ready to receive threat data.\n'));
+                    } else {
+                        console.log(chalk.red.bold('\n✗ Connection failed\n'));
+                        console.log(chalk.yellow('Error: ') + chalk.white(result.message + '\n'));
+                        console.log(chalk.gray('Troubleshooting:'));
+                        console.log(chalk.white('  1. Verify endpoint URLs are correct'));
+                        console.log(chalk.white('  2. Check your API key is valid'));
+                        console.log(chalk.white('  3. Ensure backend server is running'));
+                        console.log(chalk.white('  4. Verify network connectivity\n'));
+                    }
+                    rl.prompt();
+                });
+            
+            subProgram
                 .command('help')
                 .description('Show help')
                 .action(() => {
@@ -1294,7 +1467,7 @@ if (process.argv.length === 2) {
                 console.log(chalk.red('\n[!] Error: ' + error.message + '\n'));
                 
                 // Suggest similar commands
-                const availableCommands = ['start', 'auto', 'interfaces', 'config', 'exports', 'test-audio', 'doctor', 'help', 'stats', 'clear', 'exit'];
+                const availableCommands = ['start', 'auto', 'interfaces', 'config', 'exports', 'test-audio', 'test-backend', 'doctor', 'help', 'stats', 'clear', 'exit'];
                 const suggestions = availableCommands.filter(cmd => 
                     cmd.includes(command.toLowerCase()) || command.toLowerCase().includes(cmd)
                 );
