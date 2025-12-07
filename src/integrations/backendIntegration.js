@@ -12,17 +12,30 @@ const EventEmitter = require('events');
 class BackendIntegration extends EventEmitter {
     constructor(config) {
         super();
+        
+        // Ensure config exists and has backend property
+        if (!config || typeof config !== 'object') {
+            throw new Error('Invalid configuration object provided');
+        }
+        
         this.config = config;
-        this.enabled = config.backend?.enabled || false;
-        this.endpoints = config.backend?.endpoints || {};
-        this.apiKey = config.backend?.apiKey || '';
-        this.retryAttempts = config.backend?.retryAttempts || 3;
-        this.timeout = config.backend?.timeout || 5000;
+        
+        // Safely extract backend configuration with defaults
+        const backendConfig = config.backend || {};
+        this.enabled = backendConfig.enabled === true;
+        this.endpoints = backendConfig.endpoints || {};
+        this.apiKey = backendConfig.apiKey || process.env.SNIFFERX_API_KEY || '';
+        this.retryAttempts = backendConfig.retryAttempts || 3;
+        this.timeout = backendConfig.timeout || 5000;
+        
+        // Queue management
         this.queue = [];
         this.isProcessing = false;
-        this.maxQueueSize = 1000; // Prevent memory overflow
-        this.batchSize = 10;
-        this.batchDelay = 1000;
+        this.maxQueueSize = backendConfig.maxQueueSize || 1000;
+        this.batchSize = backendConfig.batchSize || 10;
+        this.batchDelay = backendConfig.batchDelay || 1000;
+        
+        // Statistics tracking
         this.stats = {
             sent: 0,
             failed: 0,
@@ -33,7 +46,12 @@ class BackendIntegration extends EventEmitter {
         };
         
         // Validate configuration on initialization
-        this._validateConfig();
+        try {
+            this._validateConfig();
+        } catch (error) {
+            console.error(chalk.red(`[Backend] Configuration validation failed: ${error.message}`));
+            this.enabled = false;
+        }
         
         if (this.enabled) {
             console.log(chalk.green('[Backend] Integration enabled and initialized'));
@@ -45,29 +63,46 @@ class BackendIntegration extends EventEmitter {
      * Validate backend configuration
      */
     _validateConfig() {
-        if (!this.enabled) return;
+        if (!this.enabled) {
+            return; // Skip validation if integration is disabled
+        }
 
         const warnings = [];
+        const errors = [];
         
+        // Check API key
         if (!this.apiKey) {
             warnings.push('No API key configured - authentication may fail');
         }
         
-        if (Object.keys(this.endpoints).length === 0) {
-            warnings.push('No endpoints configured');
-            this.enabled = false;
+        // Check endpoints
+        if (!this.endpoints || Object.keys(this.endpoints).length === 0) {
+            errors.push('No endpoints configured');
+        } else {
+            // Validate endpoint URLs
+            Object.entries(this.endpoints).forEach(([key, url]) => {
+                if (url) {
+                    if (!this._isValidUrl(url)) {
+                        errors.push(`Invalid URL for ${key}: ${url}`);
+                    }
+                } else {
+                    warnings.push(`Empty endpoint for ${key}`);
+                }
+            });
         }
         
-        // Validate endpoint URLs
-        Object.entries(this.endpoints).forEach(([key, url]) => {
-            if (url && !this._isValidUrl(url)) {
-                warnings.push(`Invalid URL for ${key}: ${url}`);
-            }
-        });
-        
+        // Display warnings
         if (warnings.length > 0) {
             console.log(chalk.yellow('[Backend] Configuration warnings:'));
             warnings.forEach(w => console.log(chalk.yellow(`  - ${w}`)));
+        }
+        
+        // Display errors and disable if critical issues found
+        if (errors.length > 0) {
+            console.log(chalk.red('[Backend] Configuration errors:'));
+            errors.forEach(e => console.log(chalk.red(`  - ${e}`)));
+            this.enabled = false;
+            throw new Error('Backend configuration has critical errors');
         }
     }
 

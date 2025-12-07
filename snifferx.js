@@ -270,15 +270,22 @@ function displayDashboard() {
     }
     
     // Backend Integration Status
-    if (global.backendIntegration && config.backend.enabled) {
-        const backendStats = global.backendIntegration.getStats();
-        console.log('\n' + chalk.bgCyan.black.bold(' BACKEND INTEGRATION ') + chalk.cyan(' ▼'));
-        console.log(chalk.gray('───────────────────────────────────────────────────────────'));
-        console.log(`  ${chalk.white.bold('Status:')}         ${chalk.green.bold('● CONNECTED')}`);
-        console.log(`  ${chalk.white.bold('Alerts Sent:')}    ${chalk.cyan.bold(backendStats.sent)}`);
-        console.log(`  ${chalk.white.bold('Failed:')}         ${chalk.yellow.bold(backendStats.failed)}`);
-        console.log(`  ${chalk.white.bold('Queued:')}         ${chalk.gray.bold(backendStats.queued)}`);
-        console.log(`  ${chalk.white.bold('Success Rate:')}   ${chalk.green.bold(backendStats.successRate)}`);
+    if (global.backendIntegration && config.backend && config.backend.enabled) {
+        try {
+            const backendStats = global.backendIntegration.getStats();
+            console.log('\n' + chalk.bgCyan.black.bold(' BACKEND INTEGRATION ') + chalk.cyan(' ▼'));
+            console.log(chalk.gray('───────────────────────────────────────────────────────────'));
+            console.log(`  ${chalk.white.bold('Status:')}         ${chalk.green.bold('● CONNECTED')}`);
+            console.log(`  ${chalk.white.bold('Alerts Sent:')}    ${chalk.cyan.bold(backendStats.sent)}`);
+            console.log(`  ${chalk.white.bold('Failed:')}         ${chalk.yellow.bold(backendStats.failed)}`);
+            console.log(`  ${chalk.white.bold('Queued:')}         ${chalk.gray.bold(backendStats.queued)}`);
+            console.log(`  ${chalk.white.bold('Success Rate:')}   ${chalk.green.bold(backendStats.successRate)}`);
+        } catch (error) {
+            console.log('\n' + chalk.bgRed.black.bold(' BACKEND INTEGRATION ') + chalk.red(' ▼'));
+            console.log(chalk.gray('───────────────────────────────────────────────────────────'));
+            console.log(`  ${chalk.white.bold('Status:')}         ${chalk.red.bold('● ERROR')}`);
+            console.log(`  ${chalk.gray('Error: ' + error.message)}`);
+        }
     }
     
     console.log(chalk.gray('\n╔═══════════════════════════════════════════════════════════╗'));
@@ -563,20 +570,27 @@ async function startMonitoring(interfaceId, options) {
     
     // Initialize Audio Alert System (UNIQUE FEATURE!)
     global.audioSystem = new AudioAlertSystem(config);
-    if (config.audio.playOnStartup) {
+    if (config.audio && config.audio.playOnStartup) {
         global.audioSystem.playStartupSound();
     }
     
     // Initialize Backend Integration
-    global.backendIntegration = new BackendIntegration(config);
-    if (config.backend.enabled) {
-        console.log(chalk.cyan('[Backend] Testing connection...'));
-        const testResult = await global.backendIntegration.testConnection();
-        if (testResult.success) {
-            console.log(chalk.green('[Backend] ✓ Connected successfully\n'));
-        } else {
-            console.log(chalk.yellow(`[Backend] ⚠ ${testResult.message}\n`));
+    try {
+        global.backendIntegration = new BackendIntegration(config);
+        
+        if (config.backend && config.backend.enabled) {
+            console.log(chalk.cyan('[Backend] Testing connection...'));
+            const testResult = await global.backendIntegration.testConnection();
+            if (testResult.success) {
+                console.log(chalk.green('[Backend] ✓ Connected successfully\n'));
+            } else {
+                console.log(chalk.yellow(`[Backend] ⚠ ${testResult.message}\n`));
+            }
         }
+    } catch (error) {
+        console.log(chalk.red(`[Backend] Failed to initialize: ${error.message}`));
+        console.log(chalk.gray('[Backend] Continuing without backend integration\n'));
+        global.backendIntegration = null;
     }
     
     console.log(chalk.cyan.bold('\n⚡ Initializing Detection Engines...\n'));
