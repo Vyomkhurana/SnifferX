@@ -10,7 +10,15 @@
     "start": "node snifferx.js",
     "monitor": "node snifferx.js monitor",
     "interfaces": "node snifferx.js interfaces",
-    "config": "node snifferx.js config"
+    "config": "node snifferx.js config",
+    "test": "echo \"No tests specified yet\"",
+    "postinstall": "node -e \"console.log('\\n✨ SnifferX installed successfully!\\n⚠️  Note: Requires root/admin privileges for packet capture\\n📖 Run: snifferx --help\\n')\"",
+    "doctor": "node snifferx.js doctor",
+    "prepare": "node -e \"console.log('Preparing SnifferX for deployment...')\""
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
   },
   "keywords": [
     "network",

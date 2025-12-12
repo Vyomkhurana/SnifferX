@@ -5,24 +5,57 @@
  * Professional CLI for real-time network security monitoring
  * 
  * @author Vyom Khurana
- * @version 1.0.0
- * @license MIT
+ * @version 1.3.0
+ * @license ISC
  */
+
+// Dependency checks with graceful error handling
+function checkDependencies() {
+    const required = ['chalk', 'commander', 'fs-extra', 'pcap-parser', 'play-sound', 'simple-statistics'];
+    const missing = [];
+    
+    for (const dep of required) {
+        try {
+            require.resolve(dep);
+        } catch (e) {
+            missing.push(dep);
+        }
+    }
+    
+    if (missing.length > 0) {
+        console.error('\x1b[31m✗ Missing dependencies:\x1b[0m', missing.join(', '));
+        console.error('\x1b[33m→ Run: npm install\x1b[0m');
+        process.exit(1);
+    }
+}
+
+checkDependencies();
 
 const chalk = require('chalk');
 const { Command } = require('commander');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const config = require('./config');
-const CaptureManager = require('./src/capture/captureManager');
-const DDoSDetector = require('./src/detection/ddosDetector');
-const PortScanDetector = require('./src/detection/portScanDetector');
-const IPSpoofingDetector = require('./src/detection/ipSpoofingDetector');
-const UserBehaviorAnalytics = require('./src/detection/userBehaviorAnalytics');
-const AudioAlertSystem = require('./src/audio/audioAlertSystem');
-const BackendIntegration = require('./src/integrations/backendIntegration');
-const utils = require('./utils');
+
+// Load configuration and modules with error handling
+let config, CaptureManager, DDoSDetector, PortScanDetector, IPSpoofingDetector, 
+    UserBehaviorAnalytics, AudioAlertSystem, BackendIntegration, utils;
+
+try {
+    config = require('./config');
+    CaptureManager = require('./src/capture/captureManager');
+    DDoSDetector = require('./src/detection/ddosDetector');
+    PortScanDetector = require('./src/detection/portScanDetector');
+    IPSpoofingDetector = require('./src/detection/ipSpoofingDetector');
+    UserBehaviorAnalytics = require('./src/detection/userBehaviorAnalytics');
+    AudioAlertSystem = require('./src/audio/audioAlertSystem');
+    BackendIntegration = require('./src/integrations/backendIntegration');
+    utils = require('./utils');
+} catch (error) {
+    console.error(chalk.red('✗ Failed to load modules:'), error.message);
+    console.error(chalk.yellow('→ Ensure all files are present and properly configured'));
+    process.exit(1);
+}
 
 // Utility: Format uptime in human-readable format
 function formatUptime(seconds) {

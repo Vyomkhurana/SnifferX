@@ -4,7 +4,7 @@
 
 ### Professional Network Threat Detection & Analysis Tool
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](https://opensource.org/licenses/ISC)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)]()
 [![Version](https://img.shields.io/badge/version-1.3.0-blue)](https://github.com/Vyomkhurana/SnifferX)
@@ -13,7 +13,7 @@
 
 **Real-time network security monitoring with AI-powered threat detection and audio alerts**
 
-[Features](#features) • [Installation](#installation) • [Quick Start](#usage) • [Documentation](#documentation) • [Contributing](#contributing)
+[Features](#features) • [Installation](#installation) • [Quick Start](#usage) • [Deployment](#deployment) • [Documentation](#documentation) • [Contributing](#contributing)
 
 </div>
 
@@ -554,11 +554,67 @@ For detailed documentation, visit the [docs](./docs) folder:
 
 ---
 
+
+
+## Deployment
+
+### Production Deployment
+
+For detailed deployment instructions, see **[DEPLOYMENT.md](DEPLOYMENT.md)**
+
+**Quick Deploy:**
+```bash
+# Install globally
+npm install -g snifferx
+
+# Or run from source
+git clone https://github.com/Vyomkhurana/SnifferX.git
+cd SnifferX
+npm install
+sudo node snifferx.js monitor
+```
+
+**Environment Configuration:**
+```bash
+# Copy example configuration
+cp .env.example .env
+
+# Edit configuration
+nano .env
+```
+
+**System Requirements:**
+- Node.js >= 14.0.0
+- Root/Admin privileges for packet capture
+- TShark/Wireshark installed
+- Minimum 2GB RAM for production use
+
+**Deployment Checklist:**
+- ✅ Dependencies installed
+- ✅ Configuration customized
+- ✅ Network interfaces identified
+- ✅ Permissions configured
+- ✅ Backend integration tested (if enabled)
+
+For Docker, systemd service setup, and advanced deployment options, see **[DEPLOYMENT.md](DEPLOYMENT.md)**
+
+---
+
+## Documentation
+
+- [Full Deployment Guide](./DEPLOYMENT.md)
+- [Quick Start Guide](./QUICKSTART.md)
+- [Testing Guide](./docs/TESTING_GUIDE.md)
+- [Architecture Overview](./docs/PHASE3_SUMMARY.md)
+- [Detection Algorithms](./docs/DETECTION_EXPLAINED.md)
+
+---
+
 ## Roadmap
 
 - [ ] Web-based dashboard UI
 - [ ] Export reports in PDF format
-- [ ] Integration with SIEM systems
+- [x] Integration with SIEM systems (Backend Integration - v1.3.0)
 - [ ] Custom rule engine
 - [ ] Machine learning threat prediction
 - [ ] Mobile app for alerts
@@ -568,7 +624,7 @@ For detailed documentation, visit the [docs](./docs) folder:
 
 ## License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **ISC License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
